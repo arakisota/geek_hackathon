@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  dev-postgres:
+    image: postgres:15.1-alpine
+    ports:
+      - 5434:5432
+    environment:
+      POSTGRES_USER: geek
+      POSTGRES_PASSWORD: geek
+      POSTGRES_DB: geek
+    restart: always
+    networks:
+      - blunch-network
+networks:
+  blunch-network:
