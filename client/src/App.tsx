@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
-import { Auth } from './components/Auth'
 import axios from 'axios'
 import { CsrfToken } from './types'
+import { Home } from './components/Home'
 
 function App() {
   useEffect(() => {
@@ -14,7 +14,7 @@ function App() {
     }
     getCsrfToken()
   }, [])
-  return <Auth />
+  return <Home />
 }
 
 export default App
