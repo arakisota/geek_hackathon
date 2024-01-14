@@ -1,9 +1,13 @@
-SRC := migrate/migrate.go
+MIGRATE_SRC := migrate/migrate.go
+MAIN_SRC := main.go
 
-.PHONY: up down docker-clean
+.PHONY: migrate up down docker-clean
 
 run-server:
-	GO_ENV=dev go run ${SRC}
+	GO_ENV=dev go run ${MAIN_SRC}
+
+migrate:
+	GO_ENV=dev go run ${MIGRATE_SRC}
 
 up:
 	@docker compose up -d
