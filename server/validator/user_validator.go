@@ -1,10 +1,11 @@
 package validator
 
 import (
+	"errors"
+	"regexp"
 	"server/model"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/go-ozzo/ozzo-validation/v4/is"
 )
 
 type IUserValidator interface {
@@ -22,8 +23,8 @@ func (uv *userValidator) UserValidate(user model.User) error {
 		validation.Field(
 			&user.UserId,
 			validation.Required.Error("userID is required"),
-			validation.RuneLength(1, 30).Error("limited max 30 char"),
-			is.Email.Error("is not valid email format"),
+			validation.RuneLength(3, 30).Error("limited min 3 max 30 char"),
+			validation.By(isValidUserID),
 		),
 		validation.Field(
 			&user.Password,
@@ -31,4 +32,16 @@ func (uv *userValidator) UserValidate(user model.User) error {
 			validation.RuneLength(6, 30).Error("limited min 6 max 30 char"),
 		),
 	)
+}
+
+func isValidUserID(value interface{}) error {
+    userID, ok := value.(string)
+    if !ok {
+        return errors.New("invalid type")
+    }
+    re := regexp.MustCompile(`^[a-zA-Z0-9]+$`)
+    if !re.MatchString(userID) {
+        return errors.New("is not valid userID format")
+    }
+    return nil
 }
