@@ -14,7 +14,7 @@ type StationsRequest struct {
 }
 
 type StationsResponse struct {
-	FastestStation         string `json:"fastest_station"`
-	FewestTrasitionStation string `json:"fewest_trasition_station"`
-	CheapestStation        string `json:"cheapest_station"`
+	FastestStation        string `json:"fastest_station"`
+	FewestTransferStation string `json:"fewest_transfer_station"`
+	CheapestStation       string `json:"cheapest_station"`
 }
