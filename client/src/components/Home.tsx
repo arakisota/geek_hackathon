@@ -1,8 +1,14 @@
 import { useState } from 'react'
 import { Auth } from './Auth'
+import { Map } from './Map'
 
 export const Home = () => {
   const [isLogined, setIsLogined] = useState(false)
 
-  return <Auth isLogined={isLogined} setIsLogined={setIsLogined} />
+  return (
+    <>
+      <Auth isLogined={isLogined} setIsLogined={setIsLogined} />
+      <Map />
+    </>
+  )
 }
