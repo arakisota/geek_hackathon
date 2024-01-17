@@ -31,5 +31,6 @@ func NewRouter(uc controller.IUserController, sc controller.IStationController) 
 	e.POST("/logout", uc.LogOut)
 	e.GET("/csrf", uc.CsrfToken)
 	e.POST("/stations", sc.GetStations)
+	e.GET("/suggest", sc.GetSuggestion)
 	return e
 }

@@ -8,6 +8,7 @@ import (
 
 type IStationRepository interface {
 	GetTransportRecordsByDeparture(departure string) ([]model.TransportRecord, error)
+	FindByPrefix(prefix string) ([]model.StationInfo, error)
 }
 
 type stationRepository struct {
@@ -24,4 +25,12 @@ func (sr *stationRepository) GetTransportRecordsByDeparture(departure string) ([
         return nil, err
     }
     return records, nil
+}
+
+func (sr *stationRepository) FindByPrefix(prefix string) ([]model.StationInfo, error) {
+    var stations []model.StationInfo
+    if err := sr.db.Where("name LIKE ?", prefix+"%").Or("yomi LIKE ?", prefix+"%").Limit(10).Find(&stations).Error; err != nil {
+        return nil, err
+    }
+    return stations, nil
 }
