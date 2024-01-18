@@ -13,3 +13,10 @@ export type StationsResponse = {
   fewest_transfer_station: string
   cheapest_station: string
 }
+export type StationRead = {
+  Name: string
+  Yomi: string
+}
+export type SuggestionResponse = {
+  stations: StationRead[]
+}

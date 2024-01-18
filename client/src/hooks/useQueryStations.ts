@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { useMutation } from '@tanstack/react-query'
-import { StationsResponse, StationsRequest } from '../types'
+import { StationsResponse, StationsRequest, SuggestionResponse } from '../types'
 
 export const useQueryStations = () => {
   const queryStations = useMutation<StationsResponse, Error, StationsRequest>(
@@ -12,5 +12,13 @@ export const useQueryStations = () => {
       return response.data
     }
   )
-  return queryStations
+
+  const getStationName = async (input: string) => {
+    const response = await axios.get<SuggestionResponse>(
+      `${process.env.REACT_APP_API_URL}/suggest`,
+      { params: { input } }
+    )
+    return response.data
+  }
+  return { queryStations, getStationName }
 }
