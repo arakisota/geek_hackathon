@@ -3,9 +3,10 @@ package repository
 import (
 	"encoding/json"
 	"net/http"
-	"net/url"
-	"strconv"
+	"os"
 	"strings"
+
+	"gorm.io/gorm"
 
 	"server/model"
 )
@@ -18,32 +19,27 @@ type IRestaurantRepository interface {
 }
 
 type RestaurantRepository struct {
+	db     *gorm.DB
 	apiKey string
 }
 
-func NewRestaurantRepository(apiKey string) *RestaurantRepository {
-	return &RestaurantRepository{apiKey: apiKey}
-	RailRepo IRailRepository
+func NewRestaurantRepository(db *gorm.DB) *RestaurantRepository {
+	apiKey := os.Getenv("HOTPEPPER_API_KEY") // 環境変数からAPIキーを取得
+	return &RestaurantRepository{db: db, apiKey: apiKey}
 }
 
-func (hr *HotpepperRequest) toURLValues() url.Values {
-	values := url.Values{}
-	values.Add("name", hr.Name)
-	values.Add("keyword", hr.Keyword)
-	values.Add("lat", strconv.FormatFloat(hr.Lat, 'f', -1, 64))
-	values.Add("lng", strconv.FormatFloat(hr.Lng, 'f', -1, 64))
-	values.Add("range", strconv.Itoa(hr.Range))
-	values.Add("budget", hr.Budget)
-	values.Add("order", strconv.Itoa(hr.Order))
-	values.Add("format", hr.Format)
-
-	return values
+func (rr *RestaurantRepository) GetStationCoordinates(station string) ([]model.StationCoordinates, error) {
+	var sc []model.StationCoordinates
+	if err := rr.db.Where("name=?", station).Find(&sc).Error; err != nil {
+		return nil, err
+	}
+	return sc, nil
 }
 
 func (rr *RestaurantRepository) GetRestaurants(cr model.ClientRequest) ([]model.ClientResponse, error) {
 	hr := rr.convertClientRequestToHotpepperRequest(cr)
 
-	u := "http://webservice.recruit.co.jp/hotpepper/gourmet/v1/?key=" + rr.apiKey + "&" + hr.toURLValues().Encode()
+	u := "http://webservice.recruit.co.jp/hotpepper/gourmet/v1/?key=" + rr.apiKey + "&" + hr.ToURLValues().Encode()
 
 	resp, err := http.Get(u)
 	if err != nil {
