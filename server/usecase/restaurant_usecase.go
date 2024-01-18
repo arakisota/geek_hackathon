@@ -17,6 +17,10 @@ type RestaurantUsecase struct {
 	Repository repository.IRestaurantRepository
 }
 
+func NewRestaurantUsecase(rr repository.IRestaurantRepository) IRestaurantUsecase {
+	return &RestaurantUsecase{rr}
+}
+
 func (uc *RestaurantUsecase) GetRestaurantsNearStation(cr model.ClientRequest) ([]model.ClientResponse, error) {
 	// リポジトリからレストランデータを取得
 	restaurants, err := uc.Repository.GetRestaurants(cr)
