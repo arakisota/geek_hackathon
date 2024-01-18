@@ -1,6 +1,10 @@
 package model
 
-import "time"
+import (
+	"net/url"
+	"strconv"
+	"time"
+)
 
 // データの構造を定義
 // 具体的には、クライアントからのリクエストデータ、ホットペッパーグルメAPIへのリクエストデータ、ホットペッパーグルメAPIからのレスポンスデータ、クライアントへのレスポンスデータの各構造体を定義する
@@ -25,6 +29,20 @@ type HotpepperRequest struct {
 	Format  string  `json:"format"`
 }
 
+func (hr *HotpepperRequest) ToURLValues() url.Values {
+	values := url.Values{}
+	values.Add("name", hr.Name)
+	values.Add("keyword", hr.Keyword)
+	values.Add("lat", strconv.FormatFloat(hr.Lat, 'f', -1, 64))
+	values.Add("lng", strconv.FormatFloat(hr.Lng, 'f', -1, 64))
+	values.Add("range", strconv.Itoa(hr.Range))
+	values.Add("budget", hr.Budget)
+	values.Add("order", strconv.Itoa(hr.Order))
+	values.Add("format", hr.Format)
+
+	return values
+}
+
 // ホットペッパーグルメAPIからのレスポンスデータを定義
 type HotpepperResponse struct {
 	Name         string    `json:"name"`
@@ -47,4 +65,10 @@ type ClientResponse struct {
 	OpenTime     time.Time `json:"open_time"`
 	Genre        string    `json:"genre"`
 	CouponUrls   string    `json:"coupon_urls"`
+}
+
+type StationCoordinates struct {
+	Name      string
+	Latitude  float64
+	Longitude float64
 }
