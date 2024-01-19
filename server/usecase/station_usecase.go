@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"fmt"
 	"server/model"
 	"server/repository"
 )
@@ -73,21 +72,22 @@ func (su *stationUsecase) GetStations(request model.StationsRequest) (model.Stat
 }
 
 func (su *stationUsecase) GetSuggestion(input model.SuggestionRequest) (model.SuggestionResponse, error) {
-    stations, err := su.sr.FindByPrefix(input.Input)
-    if err != nil {
-        return model.SuggestionResponse{}, err
-    }
+	stations, err := su.sr.FindByPrefix(input.Input)
+	if err != nil {
+		return model.SuggestionResponse{}, err
+	}
 
-    var stationResponses []model.SuggestStation
-    for _, station := range stations {
-		fmt.Println(station.Name, station.Yomi)
-        stationResponses = append(stationResponses, model.SuggestStation{
-            Name: station.Name,
-            Yomi: station.Yomi,
-        })
-    }
+	var stationResponses []model.SuggestStation
+	for _, station := range stations {
+		stationResponses = append(stationResponses, model.SuggestStation{
+			Name:      station.Name,
+			Yomi:      station.Yomi,
+			Longitude: station.Longitude,
+			Latitude:  station.Latitude,
+		})
+	}
 
-    return model.SuggestionResponse{Stations: stationResponses}, nil
+	return model.SuggestionResponse{Stations: stationResponses}, nil
 }
 
 type destinationInfo struct {

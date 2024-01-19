@@ -28,8 +28,10 @@ type StationInfo struct {
 }
 
 type SuggestStation struct {
-	Name string `json:"Name"`
-	Yomi string `json:"Yomi"`
+	Name      string  `json:"Name"`
+	Yomi      string  `json:"Yomi"`
+	Longitude float64 `json:"Longitude"`
+	Latitude  float64 `json:"Latitude"`
 }
 
 type SuggestionRequest struct {
