@@ -55,6 +55,8 @@ export const Form: React.FC<FormProps> = (props) => {
   const [showForm, setShowForm] = useState(true)
 
   const submitStationsHandler: SubmitHandler<FormData> = async (formData) => {
+    const arrival_time: Date = new Date(formData.arrival_time)
+    const arrival_time_ISO8601: string = arrival_time.toISOString()
     const requestData = {
       departures: formData.stations
         .map((item) => {
@@ -69,7 +71,7 @@ export const Form: React.FC<FormProps> = (props) => {
           return station !== '駅' && self.indexOf(station) === index
         }),
       people_num: formData.people_num,
-      arrival_time: formData.arrival_time,
+      arrival_time: arrival_time_ISO8601,
       purpose: formData.purpose,
     }
     mutate(requestData)
