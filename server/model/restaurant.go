@@ -34,17 +34,17 @@ type HotpepperRequest struct {
 }
 
 // ホットペッパーグルメAPIからのレスポンスデータを定義
-type HotpepperResponse struct {
-	Name       string  `json:"name"`
-	Address    string  `json:"address"`
-	Access     string  `json:"access"`
-	Latitude   float64 `json:"latitude"`
-	Longitude  float64 `json:"longitude"`
-	Budget     string  `json:"budget"`
-	Open       string  `json:"open"`
-	Genre      Genre   `json:"genre"`
-	CouponUrls string  `json:"coupon_urls"`
-}
+// type HotpepperResponse struct {
+// 	Name       string  `json:"name"`
+// 	Address    string  `json:"address"`
+// 	Access     string  `json:"access"`
+// 	Latitude   float64 `json:"latitude"`
+// 	Longitude  float64 `json:"longitude"`
+// 	Budget     string  `json:"budget"`
+// 	Open       string  `json:"open"`
+// 	Genre      Genre   `json:"genre"`
+// 	CouponUrls string  `json:"coupon_urls"`
+// }
 
 type Station struct {
 	Name       string  `json:"name"`
