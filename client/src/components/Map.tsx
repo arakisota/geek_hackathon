@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react'
 import {
   GoogleMap,
   Marker,
-  DirectionsService,
-  DirectionsRenderer,
+  // DirectionsService,
+  // DirectionsRenderer,
+  Polyline,
 } from '@react-google-maps/api'
 import { mapStyle } from '../types/mapStyle'
 import { Form } from './Form'
@@ -22,11 +23,6 @@ const containerStyle = {
 
 const defaultCenter = { lat: 35.6895, lng: 139.6917 }
 
-const positions = [
-  { lat: 35.6894, lng: 139.6917 },
-  { lat: 35.693738, lng: 139.502165 },
-]
-
 export const Map: React.FC<MapProps> = (props) => {
   const mapRef = useRef<google.maps.Map>()
 
@@ -40,12 +36,6 @@ export const Map: React.FC<MapProps> = (props) => {
     await logoutMutation.mutateAsync()
   }
 
-  const [directionsRequest, setDirectionsRequest] =
-    useState<google.maps.DirectionsRequest | null>(null)
-
-  const [directionsResponse, setDirectionsResponse] =
-    useState<google.maps.DirectionsResult | null>(null)
-
   const [stationPositions, setStationPositions] = useState<LatLng[]>([])
 
   const [isFormVisible, setIsFormVisible] = useState(true)
@@ -54,15 +44,9 @@ export const Map: React.FC<MapProps> = (props) => {
     setIsFormVisible(!isFormVisible)
   }
 
-  useEffect(() => {
-    if (positions.length >= 2) {
-      setDirectionsRequest({
-        origin: positions[0],
-        destination: positions[1],
-        travelMode: google.maps.TravelMode.DRIVING,
-      })
-    }
-  }, [positions])
+  const handleStationSelect = (positions: LatLng[]) => {
+    setStationPositions(positions)
+  }
 
   useEffect(() => {
     if (mapRef.current && stationPositions.length > 0) {
@@ -74,15 +58,17 @@ export const Map: React.FC<MapProps> = (props) => {
     }
   }, [stationPositions])
 
-  const handleStationSelect = (positions: LatLng[]) => {
-    setStationPositions(positions)
+  const polylineOptions = {
+    strokeColor: '#FF0000',
+    strokeOpacity: 1.0,
+    strokeWeight: 2,
   }
 
   return (
     <div className="relative">
       <div className="absolute top-0 left-0 z-10 p-4 ml-4 mt-4 max-w-xs bg-white rounded shadow-lg">
         <button onClick={toggleFormVisibility}>
-          {isFormVisible ? <FaChevronRight /> : <FaChevronDown />}
+          {isFormVisible ? <FaChevronDown /> : <FaChevronRight />}
         </button>
         <div style={{ display: isFormVisible ? 'block' : 'none' }}>
           <Form onStationSelect={handleStationSelect} />
@@ -113,26 +99,9 @@ export const Map: React.FC<MapProps> = (props) => {
           <Marker key={index} position={position} />
         ))}
 
-        {/* {directionsRequest && (
-          <DirectionsService
-            options={directionsRequest}
-            callback={(res, status) => {
-              if (status === google.maps.DirectionsStatus.OK) {
-                setDirectionsResponse(res)
-              } else {
-                console.error('Directions request failed due to ' + status)
-              }
-            }}
-          />
+        {stationPositions.length >= 2 && (
+          <Polyline path={stationPositions} options={polylineOptions} />
         )}
-
-        {directionsResponse && (
-          <DirectionsRenderer
-            options={{
-              directions: directionsResponse,
-            }}
-          />
-        )} */}
       </GoogleMap>
     </div>
   )
