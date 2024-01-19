@@ -19,9 +19,15 @@ export const useQueryStations = (props: QueryStationsProps) => {
         stationsRequest
       )
 
+      const stationArray: string[] = Object.values(
+        response.data as StationsResponse
+      ).map((station) => station.replace(/駅$/, ''))
+
       props.setRestaurantsRequest({
-        ...stationsRequest,
-        stations: Object.values(response.data as StationsResponse),
+        stations: stationArray,
+        people_num: stationsRequest.people_num,
+        arrival_time: stationsRequest.arrival_time,
+        purpose: stationsRequest.purpose,
       })
       return response.data
     }
