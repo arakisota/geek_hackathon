@@ -64,7 +64,7 @@ export const mapStyle = [
     elementType: 'labels',
     stylers: [
       {
-        visibility: 'on',
+        visibility: 'off',
       },
     ],
   },
@@ -73,7 +73,7 @@ export const mapStyle = [
     elementType: 'all',
     stylers: [
       {
-        visibility: 'on',
+        visibility: 'off',
       },
     ],
   },
@@ -82,7 +82,7 @@ export const mapStyle = [
     elementType: 'all',
     stylers: [
       {
-        visibility: 'on',
+        visibility: 'off',
       },
     ],
   },
@@ -91,7 +91,7 @@ export const mapStyle = [
     elementType: 'labels',
     stylers: [
       {
-        visibility: 'on',
+        visibility: 'off',
       },
     ],
   },
@@ -118,7 +118,7 @@ export const mapStyle = [
     elementType: 'labels.text',
     stylers: [
       {
-        visibility: 'on',
+        visibility: 'off',
       },
     ],
   },
@@ -253,7 +253,7 @@ export const mapStyle = [
     elementType: 'labels',
     stylers: [
       {
-        visibility: 'on',
+        visibility: 'off',
       },
     ],
   },
