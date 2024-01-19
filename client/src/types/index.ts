@@ -16,7 +16,13 @@ export type StationsResponse = {
 export type StationRead = {
   Name: string
   Yomi: string
+  Latitude: number
+  Longitude: number
 }
 export type SuggestionResponse = {
   stations: StationRead[]
+}
+export type LatLng = {
+  lat: number
+  lng: number
 }

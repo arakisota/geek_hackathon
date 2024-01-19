@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useForm, useFieldArray, SubmitHandler } from 'react-hook-form'
 import { useQueryStations } from '../hooks/useQueryStations'
 import { debounce } from 'lodash'
-import { StationRead } from '../types'
+import { StationRead, LatLng } from '../types'
 
 type FormData = {
   stations: { station: string }[]
@@ -11,7 +11,13 @@ type FormData = {
   purpose: string
 }
 
-export const Form = () => {
+type FormProps = {
+  onStationSelect: (positions: LatLng[]) => void
+}
+
+export const Form: React.FC<FormProps> = (props) => {
+  const { onStationSelect } = props
+
   const { queryStations, getStationName } = useQueryStations()
 
   // eslint-disable-next-line
@@ -35,6 +41,10 @@ export const Form = () => {
     if (count > 0) {
       remove(count)
       setCount(count - 1)
+
+      const newPositions = [...positions].slice(0, -1)
+      setPositions(newPositions)
+      onStationSelect(newPositions)
     }
   }
 
@@ -63,6 +73,7 @@ export const Form = () => {
   }
 
   const [suggestions, setSuggestions] = useState<StationRead[][]>([])
+  const [positions, setPositions] = useState<LatLng[]>([])
 
   const fetchSuggestions = async (index: number, value: string) => {
     if (value.length > 0) {
@@ -98,7 +109,17 @@ export const Form = () => {
     const newSuggestions = [...suggestions]
     newSuggestions[index] = []
     setSuggestions(newSuggestions)
+
+    const newPositions = [...positions]
+    newPositions[index] = {
+      lat: suggestion.Latitude,
+      lng: suggestion.Longitude,
+    }
+    setPositions(newPositions)
+    onStationSelect(newPositions)
   }
+
+  console.log()
 
   const peopleOptions = []
   for (let i = 1; i <= 50; i++) {
