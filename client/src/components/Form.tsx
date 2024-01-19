@@ -107,7 +107,7 @@ export const Form = () => {
   }
 
   return (
-    <div className="flex justify-center items-center flex-col min-h-screen text-gray-600 font-mono">
+    <div className="flex items-center flex-col text-gray-600 font-mono">
       <h2 className="my-6">入力フォーム</h2>
       <form
         onSubmit={handleSubmit(submitStationsHandler)}
@@ -130,7 +130,7 @@ export const Form = () => {
 
         {/* 日時選択項目 */}
         <div className="flex mb-4 items-center">
-          <label className="w-1/3" htmlFor="arrival_time">
+          <label className="w-1/5" htmlFor="arrival_time">
             日時:
           </label>
           <input
@@ -166,7 +166,7 @@ export const Form = () => {
         {/* 駅名入力項目 */}
         {fields.map((field, index) => (
           <div className="flex mb-4 items-start" key={field.id}>
-            <label className="w-1/3 pt-2" htmlFor={`station${index}`}>
+            <label className="w-1/5 pt-2" htmlFor={`station${index}`}>
               駅名{index + 1}:
             </label>
             <div className="flex-1 relative">
@@ -210,7 +210,7 @@ export const Form = () => {
             className="disabled:opacity-40 py-2 px-4 rounded text-white bg-indigo-600"
             type="submit"
           >
-            送信
+            目的地を探す
           </button>
           <button
             type="button"
