@@ -6,9 +6,15 @@ import {
   DirectionsRenderer,
 } from '@react-google-maps/api'
 import { mapStyle } from '../types/mapStyle'
+import { Form } from './Form'
+import { useMutateAuth, MutateAuthProps } from '../hooks/useMutateAuth'
+
+export type MapProps = {
+  setIsLogined: (state: boolean) => void
+}
 
 const containerStyle = {
-  width: '100%', // 修正: 'full' -> '100%'
+  width: '100%',
   height: '100vh',
 }
 
@@ -22,14 +28,24 @@ const positions = [
   { lat: 35.693738, lng: 139.502165 },
 ]
 
-export const Map: React.FC = () => {
+export const Map: React.FC<MapProps> = (props) => {
+  const { setIsLogined } = props
+
+  const { logoutMutation } = useMutateAuth({
+    setIsLogined,
+  } as MutateAuthProps)
+
+  const logout = async () => {
+    await logoutMutation.mutateAsync()
+  }
+
   const [directionsRequest, setDirectionsRequest] =
     useState<google.maps.DirectionsRequest | null>(null)
 
   const [directionsResponse, setDirectionsResponse] =
     useState<google.maps.DirectionsResult | null>(null)
 
-  const [markers, setMarkers] = useState<google.maps.LatLngLiteral[]>([])
+  // const [markers, setMarkers] = useState<google.maps.LatLngLiteral[]>([])
 
   useEffect(() => {
     if (positions.length >= 2) {
@@ -44,28 +60,10 @@ export const Map: React.FC = () => {
   return (
     <div className="relative">
       <div className="absolute top-0 left-0 z-10 p-4 ml-4 mt-4 max-w-xs bg-white rounded shadow-lg">
-        <form>
-          <div className="mb-4">
-            <label
-              htmlFor="location"
-              className="block text-gray-700 text-sm font-bold mb-2"
-            >
-              位置:
-            </label>
-            <input
-              type="text"
-              id="location"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              placeholder="位置を入力"
-            />
-          </div>
-          <button
-            type="submit"
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-          >
-            送信
-          </button>
-        </form>
+        <Form />
+      </div>
+      <div className="absolute top-0 right-0 z-10 p-4 mr-4 mt-4 max-w-xs bg-white rounded shadow-lg">
+        <button onClick={logout}>ログアウト</button>
       </div>
       <GoogleMap
         mapContainerStyle={containerStyle}
@@ -74,9 +72,10 @@ export const Map: React.FC = () => {
         options={{
           styles: mapStyle,
           streetViewControl: false,
+          fullscreenControl: false,
           mapTypeControl: true,
           mapTypeControlOptions: {
-            position: google.maps.ControlPosition.TOP_RIGHT,
+            position: google.maps.ControlPosition.TOP_CENTER,
           },
         }}
       >
