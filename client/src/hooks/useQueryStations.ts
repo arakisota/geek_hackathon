@@ -21,7 +21,11 @@ export const useQueryStations = (props: QueryStationsProps) => {
 
       const stationArray: string[] = Object.values(
         response.data as StationsResponse
-      ).map((station) => station.replace(/駅$/, ''))
+      )
+        .map((station) => station.replace(/駅$/, ''))
+        .filter((station, index, self) => {
+          return self.indexOf(station) === index
+        })
 
       props.setRestaurantsRequest({
         stations: stationArray,
