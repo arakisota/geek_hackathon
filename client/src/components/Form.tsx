@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { useForm, useFieldArray, SubmitHandler } from 'react-hook-form'
 import { useQueryStations } from '../hooks/useQueryStations'
 import { debounce } from 'lodash'
-import { StationRead, LatLng } from '../types'
+import { StationRead, LatLng, RestaurantsRequest } from '../types'
+import { QueryStationsProps } from '../hooks/useQueryStations'
 
 type FormData = {
   stations: { station: string }[]
@@ -13,12 +14,15 @@ type FormData = {
 
 type FormProps = {
   onStationSelect: (positions: LatLng[]) => void
+  setRestaurantsRequest: (restaurantsRequest: RestaurantsRequest) => void
 }
 
 export const Form: React.FC<FormProps> = (props) => {
-  const { onStationSelect } = props
+  const { onStationSelect, setRestaurantsRequest } = props
 
-  const { queryStations, getStationName } = useQueryStations()
+  const { queryStations, getStationName } = useQueryStations({
+    setRestaurantsRequest,
+  } as QueryStationsProps)
 
   // eslint-disable-next-line
   const { data, isLoading, error, mutate } = queryStations

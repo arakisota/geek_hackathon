@@ -8,7 +8,8 @@ import {
 } from '@react-google-maps/api'
 import { mapStyle } from '../types/mapStyle'
 import { Form } from './Form'
-import { LatLng } from '../types'
+import { Plan } from './Plan'
+import { LatLng, RestaurantsRequest } from '../types'
 import { useMutateAuth, MutateAuthProps } from '../hooks/useMutateAuth'
 import { FaChevronDown, FaChevronRight } from 'react-icons/fa'
 
@@ -35,6 +36,9 @@ export const Map: React.FC<MapProps> = (props) => {
   const logout = async () => {
     await logoutMutation.mutateAsync()
   }
+
+  const [restaurantsRequest, setRestaurantsRequest] =
+    useState<RestaurantsRequest>()
 
   const [stationPositions, setStationPositions] = useState<LatLng[]>([])
 
@@ -71,7 +75,11 @@ export const Map: React.FC<MapProps> = (props) => {
           {isFormVisible ? <FaChevronDown /> : <FaChevronRight />}
         </button>
         <div style={{ display: isFormVisible ? 'block' : 'none' }}>
-          <Form onStationSelect={handleStationSelect} />
+          <Form
+            onStationSelect={handleStationSelect}
+            setRestaurantsRequest={setRestaurantsRequest}
+          />
+          <Plan restaurantsRequest={restaurantsRequest} />
         </div>
       </div>
       <div className="absolute top-0 right-0 z-10 p-4 mr-4 mt-4 max-w-xs bg-white rounded shadow-lg">

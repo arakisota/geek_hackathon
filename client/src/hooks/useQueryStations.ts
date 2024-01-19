@@ -1,14 +1,28 @@
 import axios from 'axios'
 import { useMutation } from '@tanstack/react-query'
-import { StationsResponse, StationsRequest, SuggestionResponse } from '../types'
+import {
+  StationsResponse,
+  StationsRequest,
+  SuggestionResponse,
+  RestaurantsRequest,
+} from '../types'
 
-export const useQueryStations = () => {
+export type QueryStationsProps = {
+  setRestaurantsRequest: (restaurantsRequest: RestaurantsRequest) => void
+}
+
+export const useQueryStations = (props: QueryStationsProps) => {
   const queryStations = useMutation<StationsResponse, Error, StationsRequest>(
     async (stationsRequest: StationsRequest) => {
       const response = await axios.post<StationsResponse>(
         `${process.env.REACT_APP_API_URL}/stations`,
         stationsRequest
       )
+
+      props.setRestaurantsRequest({
+        ...stationsRequest,
+        stations: Object.values(response.data as StationsResponse),
+      })
       return response.data
     }
   )
