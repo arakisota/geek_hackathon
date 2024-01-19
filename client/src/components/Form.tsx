@@ -38,6 +38,8 @@ export const Form = () => {
     }
   }
 
+  const [showForm, setShowForm] = useState(true)
+
   const submitStationsHandler: SubmitHandler<FormData> = async (formData) => {
     const requestData = {
       departures: formData.stations
@@ -57,6 +59,7 @@ export const Form = () => {
       purpose: formData.purpose,
     }
     mutate(requestData)
+    setShowForm(false)
   }
 
   const [suggestions, setSuggestions] = useState<StationRead[][]>([])
@@ -106,9 +109,28 @@ export const Form = () => {
     )
   }
 
+  // データ表示
+  if (!showForm && data) {
+    return (
+      <div className="flex items-center flex-col text-gray-600 font-mono">
+        <ul className="my-5">
+          <li key="fastest">最速の駅: {data.fastest_station}</li>
+          <li key="fewest">最少乗換えの駅: {data.fewest_transfer_station}</li>
+          <li key="cheapest">最安値の駅: {data.cheapest_station}</li>
+        </ul>
+        <button
+          onClick={() => setShowForm(true)}
+          className="py-2 px-4 rounded text-white bg-indigo-600"
+        >
+          フォームに戻る
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div className="flex items-center flex-col text-gray-600 font-mono">
-      <h2 className="my-6">入力フォーム</h2>
+      {/* <h2 className="my-6">入力フォーム</h2> */}
       <form
         onSubmit={handleSubmit(submitStationsHandler)}
         className="w-full max-w-md"
@@ -221,15 +243,6 @@ export const Form = () => {
           </button>
         </div>
       </form>
-      {isLoading ? (
-        <p>Loading...</p>
-      ) : (
-        <ul className="my-5">
-          <li key="fastest">最速の駅: {data?.fastest_station}</li>
-          <li key="fewest">最少乗換えの駅: {data?.fewest_transfer_station}</li>
-          <li key="cheapest">最安値の駅: {data?.cheapest_station}</li>
-        </ul>
-      )}
     </div>
   )
 }
