@@ -37,19 +37,19 @@ func initializeTransportRecord(db *gorm.DB) {
 		log.Fatal("An error occurred while reading the CSV file", err)
 	}
 
-	for idx, record := range records[1:] {
+	for _, record := range records[1:] {
 		record := strings.Split(record[0], ",")
 		time, _ := strconv.ParseUint(record[2], 10, 64)
 		count, _ := strconv.ParseUint(record[3], 10, 64)
 		fare, _ := strconv.ParseUint(record[4], 10, 64)
 
 		transportRecord := model.TransportRecord{
-			InformationId: uint(idx),
-			Departure:     record[0],
-			Destination:   record[1],
-			Time:          uint(time),
-			Count:         uint(count),
-			Fare:          uint(fare),
+			// InformationId: uint(idx),
+			Departure:   record[0],
+			Destination: record[1],
+			Time:        uint(time),
+			Count:       uint(count),
+			Fare:        uint(fare),
 		}
 
 		if err := db.Create(&transportRecord).Error; err != nil {
