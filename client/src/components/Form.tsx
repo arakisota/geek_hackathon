@@ -15,10 +15,11 @@ type FormData = {
 type FormProps = {
   onStationSelect: (positions: LatLng[]) => void
   setRestaurantsRequest: (restaurantsRequest: RestaurantsRequest) => void
+  onSubmit: () => void
 }
 
 export const Form: React.FC<FormProps> = (props) => {
-  const { onStationSelect, setRestaurantsRequest } = props
+  const { onStationSelect, setRestaurantsRequest, onSubmit } = props
 
   const { queryStations, getStationName } = useQueryStations({
     setRestaurantsRequest,
@@ -76,6 +77,8 @@ export const Form: React.FC<FormProps> = (props) => {
     }
     mutate(requestData)
     setShowForm(false)
+    onStationSelect([])
+    onSubmit()
   }
 
   const [suggestions, setSuggestions] = useState<StationRead[][]>([])

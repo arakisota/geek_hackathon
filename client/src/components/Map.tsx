@@ -1,11 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import {
-  GoogleMap,
-  Marker,
-  // DirectionsService,
-  // DirectionsRenderer,
-  Polyline,
-} from '@react-google-maps/api'
+import { GoogleMap, Marker, Polyline } from '@react-google-maps/api'
 import { mapStyle } from '../types/mapStyle'
 import { Form } from './Form'
 import { Plan } from './Plan'
@@ -40,16 +34,62 @@ export const Map: React.FC<MapProps> = (props) => {
   const [restaurantsRequest, setRestaurantsRequest] =
     useState<RestaurantsRequest>()
 
-  const [stationPositions, setStationPositions] = useState<LatLng[]>([])
-
   const [isFormVisible, setIsFormVisible] = useState(true)
 
   const toggleFormVisibility = () => {
     setIsFormVisible(!isFormVisible)
   }
 
+  const [showForm, setShowForm] = useState(true)
+
+  const handleFormSubmit = () => {
+    setShowForm(false)
+  }
+
+  const handleBackToForm = () => {
+    setShowForm(true)
+  }
+
+  const [restaurantPositions, setRestaurantPositions] = useState<LatLng[]>([])
+  const [selectedRestaurantIndex, setSelectedRestaurantIndex] = useState<
+    number | null
+  >(null)
+
+  const handleRestaurantsSelect = (coordinates: LatLng[]) => {
+    setRestaurantPositions(coordinates)
+  }
+
+  const handleActiveRestaurantIndexChange = (index: number) => {
+    setSelectedRestaurantIndex(index)
+  }
+
+  const [stationPositions, setStationPositions] = useState<LatLng[]>([])
+
+  const adjustMapCenter = (selectedPosition: LatLng) => {
+    if (mapRef.current) {
+      const currentZoom = mapRef.current.getZoom()
+      const offset = calculateOffsetBasedOnZoomLevel(
+        currentZoom ? currentZoom : 12
+      )
+      const newCenter = {
+        lat: selectedPosition.lat,
+        lng: selectedPosition.lng - offset,
+      }
+      mapRef.current.setCenter(newCenter)
+    }
+  }
+
+  const calculateOffsetBasedOnZoomLevel = (zoomLevel: number) => {
+    // ズームレベルに基づいて中心座標を左にずらすオフセットを計算
+    return 0.001 / Math.pow(2, zoomLevel - 10)
+  }
+
   const handleStationSelect = (positions: LatLng[]) => {
     setStationPositions(positions)
+
+    if (positions.length > 0) {
+      adjustMapCenter(positions[0])
+    }
   }
 
   useEffect(() => {
@@ -70,18 +110,37 @@ export const Map: React.FC<MapProps> = (props) => {
 
   return (
     <div className="relative">
-      <div className="absolute top-0 left-0 z-10 p-4 ml-4 mt-4 max-w-xs bg-white rounded shadow-lg">
-        <button onClick={toggleFormVisibility}>
-          {isFormVisible ? <FaChevronDown /> : <FaChevronRight />}
-        </button>
-        <div style={{ display: isFormVisible ? 'block' : 'none' }}>
-          <Form
-            onStationSelect={handleStationSelect}
-            setRestaurantsRequest={setRestaurantsRequest}
-          />
-          <Plan restaurantsRequest={restaurantsRequest} />
+      {showForm ? (
+        <>
+          <div className="absolute top-0 left-0 z-10 p-4 ml-4 mt-4 max-w-xl bg-white rounded shadow-lg">
+            <button onClick={toggleFormVisibility}>
+              {isFormVisible ? <FaChevronDown /> : <FaChevronRight />}
+            </button>
+            <div style={{ display: isFormVisible ? 'block' : 'none' }}>
+              <Form
+                onStationSelect={handleStationSelect}
+                setRestaurantsRequest={setRestaurantsRequest}
+                onSubmit={handleFormSubmit}
+              />
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="absolute top-0 left-0 z-10 p-4 ml-4 mt-4 max-w-xl bg-white rounded shadow-lg max-h-[95%] overflow-y-auto">
+          <button onClick={toggleFormVisibility}>
+            {isFormVisible ? <FaChevronDown /> : <FaChevronRight />}
+          </button>
+          <div style={{ display: isFormVisible ? 'block' : 'none' }}>
+            <Plan
+              onStationSelect={handleStationSelect}
+              restaurantsRequest={restaurantsRequest}
+              onBack={handleBackToForm}
+              onRestaurantsSelect={handleRestaurantsSelect}
+              onActiveRestaurantIndexChange={handleActiveRestaurantIndexChange}
+            />
+          </div>
         </div>
-      </div>
+      )}
       <div className="absolute top-0 right-0 z-10 p-4 mr-4 mt-4 max-w-xs bg-white rounded shadow-lg">
         <button onClick={logout}>ログアウト</button>
       </div>
@@ -107,9 +166,25 @@ export const Map: React.FC<MapProps> = (props) => {
           <Marker key={index} position={position} />
         ))}
 
-        {stationPositions.length >= 2 && (
+        {stationPositions.length >= 0 && (
           <Polyline path={stationPositions} options={polylineOptions} />
         )}
+
+        {restaurantPositions.map((position, index) => (
+          <Marker
+            key={index}
+            position={position}
+            icon={
+              selectedRestaurantIndex === index
+                ? {
+                    url: 'path_to_selected_icon',
+                    scaledSize: new google.maps.Size(30, 45),
+                  }
+                : undefined
+            }
+            label={String(index + 1)}
+          />
+        ))}
       </GoogleMap>
     </div>
   )
