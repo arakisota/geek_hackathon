@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import {
   GoogleMap,
   Marker,
@@ -7,9 +7,11 @@ import {
 } from '@react-google-maps/api'
 import { mapStyle } from '../types/mapStyle'
 import { Form } from './Form'
+import { LatLng } from '../types'
 import { useMutateAuth, MutateAuthProps } from '../hooks/useMutateAuth'
+import { FaChevronDown, FaChevronRight } from 'react-icons/fa'
 
-export type MapProps = {
+type MapProps = {
   setIsLogined: (state: boolean) => void
 }
 
@@ -18,10 +20,7 @@ const containerStyle = {
   height: '100vh',
 }
 
-const center = {
-  lat: 35.6894,
-  lng: 139.6917,
-}
+const defaultCenter = { lat: 35.6895, lng: 139.6917 }
 
 const positions = [
   { lat: 35.6894, lng: 139.6917 },
@@ -29,6 +28,8 @@ const positions = [
 ]
 
 export const Map: React.FC<MapProps> = (props) => {
+  const mapRef = useRef<google.maps.Map>()
+
   const { setIsLogined } = props
 
   const { logoutMutation } = useMutateAuth({
@@ -45,7 +46,13 @@ export const Map: React.FC<MapProps> = (props) => {
   const [directionsResponse, setDirectionsResponse] =
     useState<google.maps.DirectionsResult | null>(null)
 
-  // const [markers, setMarkers] = useState<google.maps.LatLngLiteral[]>([])
+  const [stationPositions, setStationPositions] = useState<LatLng[]>([])
+
+  const [isFormVisible, setIsFormVisible] = useState(true)
+
+  const toggleFormVisibility = () => {
+    setIsFormVisible(!isFormVisible)
+  }
 
   useEffect(() => {
     if (positions.length >= 2) {
@@ -57,17 +64,36 @@ export const Map: React.FC<MapProps> = (props) => {
     }
   }, [positions])
 
+  useEffect(() => {
+    if (mapRef.current && stationPositions.length > 0) {
+      const bounds = new window.google.maps.LatLngBounds()
+      stationPositions.forEach((stationPosition) => {
+        bounds.extend(stationPosition)
+      })
+      mapRef.current.fitBounds(bounds)
+    }
+  }, [stationPositions])
+
+  const handleStationSelect = (positions: LatLng[]) => {
+    setStationPositions(positions)
+  }
+
   return (
     <div className="relative">
       <div className="absolute top-0 left-0 z-10 p-4 ml-4 mt-4 max-w-xs bg-white rounded shadow-lg">
-        <Form />
+        <button onClick={toggleFormVisibility}>
+          {isFormVisible ? <FaChevronRight /> : <FaChevronDown />}
+        </button>
+        <div style={{ display: isFormVisible ? 'block' : 'none' }}>
+          <Form onStationSelect={handleStationSelect} />
+        </div>
       </div>
       <div className="absolute top-0 right-0 z-10 p-4 mr-4 mt-4 max-w-xs bg-white rounded shadow-lg">
         <button onClick={logout}>ログアウト</button>
       </div>
       <GoogleMap
         mapContainerStyle={containerStyle}
-        center={center}
+        center={defaultCenter}
         zoom={12}
         options={{
           styles: mapStyle,
@@ -78,8 +104,12 @@ export const Map: React.FC<MapProps> = (props) => {
             position: google.maps.ControlPosition.TOP_CENTER,
           },
         }}
+        onLoad={(map) => {
+          mapRef.current = map
+          return void 0 // 明示的にvoid型を返す
+        }}
       >
-        {positions.map((position, index) => (
+        {stationPositions.map((position, index) => (
           <Marker key={index} position={position} />
         ))}
 
