@@ -8,6 +8,10 @@ export const useQueryRestaurants = () => {
     Error,
     RestaurantsRequest
   >(async (restaurantsRequest: RestaurantsRequest) => {
+    restaurantsRequest.people_num = parseInt(
+      restaurantsRequest.people_num.toString(),
+      10
+    )
     const response = await axios.post<RestaurantsResponse>(
       `${process.env.REACT_APP_API_URL}/restaurants`,
       restaurantsRequest
