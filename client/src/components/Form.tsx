@@ -28,13 +28,20 @@ export const Form: React.FC<FormProps> = (props) => {
   // eslint-disable-next-line
   const { data, isLoading, error, mutate } = queryStations
 
-  const { register, handleSubmit, control, setValue } = useForm<FormData>({
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    formState: { isValid },
+  } = useForm<FormData>({
     defaultValues: {
       stations: [{ station: '' }],
       people_num: 1,
       arrival_time: '',
       purpose: '',
     },
+    mode: 'onChange',
   })
   const { fields, append, remove } = useFieldArray({
     control,
@@ -171,7 +178,7 @@ export const Form: React.FC<FormProps> = (props) => {
             人数:
           </label>
           <select
-            {...register('people_num')}
+            {...register('people_num', { required: '人数を選択してください' })}
             className="flex-1 px-3 py-2 border border-gray-300"
             id="people_num"
           >
@@ -187,7 +194,9 @@ export const Form: React.FC<FormProps> = (props) => {
           </label>
           <input
             type="datetime-local"
-            {...register('arrival_time')}
+            {...register('arrival_time', {
+              required: '日時を入力してください',
+            })}
             className="flex-1 px-3 py-2 border border-gray-300"
             id="arrival_time"
             placeholder="日時を入力してください"
@@ -200,7 +209,7 @@ export const Form: React.FC<FormProps> = (props) => {
             目的:
           </label>
           <select
-            {...register('purpose')}
+            {...register('purpose', { required: '目的を選択してください' })}
             className="flex-1 px-3 py-2 border border-gray-300"
             id="purpose"
           >
@@ -227,6 +236,7 @@ export const Form: React.FC<FormProps> = (props) => {
                 placeholder="駅名を入力してください"
                 {...register(`stations.${index}.station`, {
                   onChange: (e) => handleInputChange(index, e),
+                  required: '駅名を入力してください',
                 })}
                 id={`station${index}`}
               />
@@ -259,8 +269,11 @@ export const Form: React.FC<FormProps> = (props) => {
             +
           </button>
           <button
-            className="disabled:opacity-40 py-2 px-4 rounded text-white bg-indigo-600"
             type="submit"
+            disabled={!isValid}
+            className={`py-2 px-4 rounded text-white ${
+              isValid ? 'bg-indigo-600' : 'bg-gray-400'
+            }`}
           >
             目的地を探す
           </button>
