@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"container/heap"
+	"fmt"
 	"server/model"
 	"server/repository"
 )
@@ -40,6 +41,9 @@ func (ru *routeUsecase) GetRoute(request model.RouteRequest) (model.RouteRespons
 		graph[mapStation[edge.Station2]] = append(graph[mapStation[edge.Station2]], Pair{mapStation[edge.Station1], edge.Distance})
 	}
 	
+	fmt.Println(stations[117])
+	fmt.Println(graph[117])
+
 	response := model.RouteResponse{}
 
     for _, desStation := range request.DestinationStations {
@@ -77,7 +81,7 @@ type PriorityQueue []Pair
 
 func (pq PriorityQueue) Len() int { return len(pq) }
 func (pq PriorityQueue) Less(i, j int) bool {
-	return uint(pq[i].Second) < uint(pq[j].Second)
+	return float64(pq[i].Second) < float64(pq[j].Second)
 }
 func (pq PriorityQueue) Swap(i, j int) {
 	pq[i], pq[j] = pq[j], pq[i]
@@ -94,6 +98,7 @@ func (pq *PriorityQueue) Pop() interface{} {
 }
 
 func dijkstra(mapStation map[string]uint, graph [][]Pair, depStation string, desStation string) []uint {
+	fmt.Println(depStation, desStation)
 	pq := make(PriorityQueue, 0)
 	heap.Push(&pq, Pair{mapStation[depStation], 0})
 	dist := make([]float64, len(graph))
@@ -116,17 +121,26 @@ func dijkstra(mapStation map[string]uint, graph [][]Pair, depStation string, des
 			}
 		}
 	}
+	fmt.Println(dist[mapStation[desStation]])
+
 	route := make([]uint, 0)
 	current := mapStation[desStation]
 	route = append(route, current)
 	for current != mapStation[depStation] {
+		found := false
 		for _, u := range graph[current] {
 			if dist[current] == dist[u.First] + u.Second {
 				current = u.First
+				route = append(route, current)
+				found = true
 				break
 			}
 		}
-		route = append(route, current)
+		if !found {
+			// 適切な前の頂点が見つからない場合、エラーを処理する
+			fmt.Println("エラー：経路が見つかりません")
+			return nil
+		}
 	}
 	for i, j := 0, len(route)-1; i < j; i, j = i+1, j-1 {
 		route[i], route[j] = route[j], route[i]
