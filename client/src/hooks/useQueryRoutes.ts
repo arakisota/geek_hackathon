@@ -8,10 +8,10 @@ export const useQueryRoutes = () => {
   const queryRoutes = useMutation<RoutesResponse, Error, RoutesRequest>(
     async (routesRequest: RoutesRequest) => {
       const response = await axios.post<RoutesResponse>(
-        `${process.env.REACT_APP_API_URL}/routes`, // TODO: エンドポイントに合わせる
+        `${process.env.REACT_APP_API_URL}/routes`, 
         routesRequest
       )
-
+      
       return response.data
     }
   )

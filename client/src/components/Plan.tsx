@@ -69,8 +69,7 @@ export const Plan: React.FC<PlanProps> = (props) => {
 
   useEffect(() => {
     if (routesRequest?.destination_stations !== undefined) {
-      console.log(routesRequest)
-      // queryRoutes.mutate(routesRequest) // TODO; エンドポイント実装後に使用
+      queryRoutes.mutate(routesRequest)
     }
   }, [routesRequest?.destination_stations])
 
@@ -89,7 +88,8 @@ export const Plan: React.FC<PlanProps> = (props) => {
         return destination.routes
       }
     })
-    // onStationSelect(stationPositions)
+    console.log(routesPositions)
+    // onStationSelect(routesPositions)
   }, [selectedStationIndex])
 
   useEffect(() => {
