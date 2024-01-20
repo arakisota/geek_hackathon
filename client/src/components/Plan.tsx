@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { LatLng, RestaurantsRequest, RoutesRequest } from '../types'
+import { LatLng, RestaurantsRequest, RoutesRequest, Stations } from '../types'
 import { useQueryRestaurants } from '../hooks/useQueryRestaurant'
 import { useQueryRoutes } from '../hooks/useQueryRoutes'
 
 type PlanProps = {
   onStationSelect: (positions: LatLng[]) => void
+  onStationSelectRoutes: (positions: (Stations[] | undefined)[]) => void
   restaurantsRequest: RestaurantsRequest | undefined
   routesRequest: RoutesRequest | undefined
   onBack: () => void
@@ -40,6 +41,7 @@ interface OpeningHoursProps {
 export const Plan: React.FC<PlanProps> = (props) => {
   const {
     onStationSelect,
+    onStationSelectRoutes,
     restaurantsRequest,
     routesRequest,
     onBack,
@@ -77,20 +79,17 @@ export const Plan: React.FC<PlanProps> = (props) => {
   const [activeRestaurantTab, setActiveRestaurantTab] = useState(0)
 
   useEffect(() => {
-    if (routesData === undefined) {
+    if (!routesData || !restaurantsRequest) {
       return
     }
-    const routesPositions = routesData.destinations.map((destination) => {
-      if (
-        destination.destination ===
-        restaurantsRequest?.stations[selectedStationIndex]
-      ) {
-        return destination.routes
-      }
-    })
-    console.log(routesPositions)
-    // onStationSelect(routesPositions)
-  }, [selectedStationIndex])
+    const selectedStation = restaurantsRequest.stations[selectedStationIndex]
+    onStationSelectRoutes([])
+    const newRoutesPositions = routesData.destinations
+      .filter((destination) => destination.destination === selectedStation)
+      .map((destination) => destination.routes)
+
+    onStationSelectRoutes(newRoutesPositions)
+  }, [selectedStationIndex, routesData, restaurantsRequest])
 
   useEffect(() => {
     if (restaurantData === undefined) {
@@ -170,8 +169,7 @@ export const Plan: React.FC<PlanProps> = (props) => {
     </>
   )
 
-  if (restaurantError) {
-    // if (restaurantError || routesError) {
+  if (restaurantError || routesError) {
     return (
       <>
         <div>エラーが発生しました</div>
@@ -181,6 +179,7 @@ export const Plan: React.FC<PlanProps> = (props) => {
             onBack()
             onStationSelect([])
             onRestaurantsSelect([])
+            onStationSelectRoutes([])
           }}
         >
           再入力する
@@ -219,6 +218,7 @@ export const Plan: React.FC<PlanProps> = (props) => {
             onBack()
             onStationSelect([])
             onRestaurantsSelect([])
+            onStationSelectRoutes([])
           }}
         >
           再入力する

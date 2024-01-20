@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { GoogleMap, Marker, Polyline } from '@react-google-maps/api'
-import { LatLng, RestaurantsRequest, RoutesRequest } from '../types'
+import { LatLng, RestaurantsRequest, RoutesRequest, Stations } from '../types'
 import { mapStyle } from '../types/mapStyle'
 import { Form } from './Form'
 import { Plan } from './Plan'
@@ -65,14 +65,24 @@ export const Map: React.FC<MapProps> = (props) => {
   }
 
   const [stationPositions, setStationPositions] = useState<LatLng[]>([])
-  const [routePositions, setRoutePositions] = useState<LatLng[]>([])
+  const [routePositions, setRoutePositions] = useState<
+    (Stations[] | undefined)[]
+  >([])
+
+  console.log(routePositions)
 
   const handleStationSelect = (positions: LatLng[]) => {
     setStationPositions(positions)
   }
 
+  const handleStationRoutesSelect = (positions: (Stations[] | undefined)[]) => {
+    setRoutePositions(positions)
+  }
+
   useEffect(() => {
     if (mapRef.current && stationPositions.length > 0) {
+      setRoutePositions([])
+
       const bounds = new window.google.maps.LatLngBounds()
       stationPositions.forEach((stationPosition) => {
         bounds.extend(stationPosition)
@@ -84,7 +94,7 @@ export const Map: React.FC<MapProps> = (props) => {
   const polylineOptions = {
     strokeColor: '#FF0000',
     strokeOpacity: 1.0,
-    strokeWeight: 2,
+    strokeWeight: 10,
   }
 
   return (
@@ -113,6 +123,7 @@ export const Map: React.FC<MapProps> = (props) => {
           <div style={{ display: isFormVisible ? 'block' : 'none' }}>
             <Plan
               onStationSelect={handleStationSelect}
+              onStationSelectRoutes={handleStationRoutesSelect}
               restaurantsRequest={restaurantsRequest}
               routesRequest={routesRequest}
               onBack={handleBackToForm}
@@ -147,9 +158,16 @@ export const Map: React.FC<MapProps> = (props) => {
           <Marker key={index} position={position} />
         ))}
 
-        {stationPositions.length >= 0 && (
-          <Polyline path={stationPositions} options={polylineOptions} />
-        )}
+        {selectedRestaurantIndex !== null &&
+        routePositions[selectedRestaurantIndex]
+          ? routePositions[selectedRestaurantIndex]?.map((route, index) => (
+              <Polyline
+                key={index}
+                path={route.stations}
+                options={polylineOptions}
+              />
+            ))
+          : null}
 
         {restaurantPositions.map((position, index) => (
           <Marker
