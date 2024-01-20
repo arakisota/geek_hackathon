@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { LatLng, RestaurantsRequest } from '../types'
+import { LatLng, RestaurantsRequest, RoutesRequest } from '../types'
 import { useQueryRestaurants } from '../hooks/useQueryRestaurant'
+import { useQueryRoutes } from '../hooks/useQueryRoutes'
 
 type PlanProps = {
   onStationSelect: (positions: LatLng[]) => void
   restaurantsRequest: RestaurantsRequest | undefined
+  routesRequest: RoutesRequest | undefined
   onBack: () => void
   onRestaurantsSelect: (coordinates: LatLng[]) => void
   onActiveRestaurantIndexChange: (index: number) => void
@@ -39,30 +41,62 @@ export const Plan: React.FC<PlanProps> = (props) => {
   const {
     onStationSelect,
     restaurantsRequest,
+    routesRequest,
     onBack,
     onRestaurantsSelect,
     onActiveRestaurantIndexChange,
   } = props
 
   const { queryRestaurants } = useQueryRestaurants()
-
-  const { data, isLoading, error } = queryRestaurants
+  const {
+    data: restaurantData,
+    isLoading: restaurantIsLoading,
+    error: restaurantError,
+  } = queryRestaurants
 
   useEffect(() => {
     if (restaurantsRequest?.stations !== undefined) {
       queryRestaurants.mutate(restaurantsRequest)
     }
-    console.log(restaurantsRequest)
   }, [restaurantsRequest?.stations])
+
+  const { queryRoutes } = useQueryRoutes()
+  const {
+    data: routesData,
+    isLoading: routesIsLoading,
+    error: routesError,
+  } = queryRoutes
+
+  useEffect(() => {
+    if (routesRequest?.destination_stations !== undefined) {
+      console.log(routesRequest)
+      // queryRoutes.mutate(routesRequest) // TODO; エンドポイント実装後に使用
+    }
+  }, [routesRequest?.destination_stations])
 
   const [selectedStationIndex, setSelectedStationIndex] = useState(0)
   const [activeRestaurantTab, setActiveRestaurantTab] = useState(0)
 
   useEffect(() => {
-    if (data === undefined) {
+    if (routesData === undefined) {
       return
     }
-    const stationRestaurants = data[selectedStationIndex].stations
+    const routesPositions = routesData.destinations.map((destination) => {
+      if (
+        destination.destination ===
+        restaurantsRequest?.stations[selectedStationIndex]
+      ) {
+        return destination.routes
+      }
+    })
+    // onStationSelect(stationPositions)
+  }, [selectedStationIndex])
+
+  useEffect(() => {
+    if (restaurantData === undefined) {
+      return
+    }
+    const stationRestaurants = restaurantData[selectedStationIndex].stations
     const restaurantCoordinates = stationRestaurants?.map((restaurant) => ({
       lat: restaurant.lat,
       lng: restaurant.lng,
@@ -74,7 +108,7 @@ export const Plan: React.FC<PlanProps> = (props) => {
 
     // 選択されているレストランのインデックスを親コンポーネントに渡す
     onActiveRestaurantIndexChange(activeRestaurantTab)
-  }, [selectedStationIndex, activeRestaurantTab, data])
+  }, [selectedStationIndex, activeRestaurantTab, restaurantData])
 
   const TabButton: React.FC<TabButtonProps> = ({
     index,
@@ -136,15 +170,34 @@ export const Plan: React.FC<PlanProps> = (props) => {
     </>
   )
 
-  if (isLoading) {
+  if (restaurantError) {
+    // if (restaurantError || routesError) {
+    return (
+      <>
+        <div>エラーが発生しました</div>
+        <button
+          className={'px-4 py-2 bg-gray-200'}
+          onClick={() => {
+            onBack()
+            onStationSelect([])
+            onRestaurantsSelect([])
+          }}
+        >
+          再入力する
+        </button>
+      </>
+    )
+  }
+
+  if (restaurantIsLoading || routesIsLoading) {
     return <div>計算中...</div>
   }
 
   return (
     <div className="mx-auto overflow-y-auto">
       <div className="flex flex-wrap space-x-2 p-4">
-        {data &&
-          data.map((_, index) => (
+        {restaurantData &&
+          restaurantData.map((_, index) => (
             <button
               key={index}
               className={`px-4 py-2 ${
@@ -172,24 +225,31 @@ export const Plan: React.FC<PlanProps> = (props) => {
         </button>
       </div>
       <div className="flex space-x-2 border-b">
-        {data &&
-          data[selectedStationIndex]?.stations.map((restaurant, index) => (
-            <TabButton
-              key={index}
-              index={index}
-              isActive={index === activeRestaurantTab}
-              onClick={() => setActiveRestaurantTab(index)}
-            />
-          ))}
+        {restaurantData &&
+          restaurantData[selectedStationIndex]?.stations.map(
+            (restaurant, index) => (
+              <TabButton
+                key={index}
+                index={index}
+                isActive={index === activeRestaurantTab}
+                onClick={() => setActiveRestaurantTab(index)}
+              />
+            )
+          )}
       </div>
       <div className="p-4">
-        {data && data[selectedStationIndex]?.stations[activeRestaurantTab] && (
-          <RestaurantInfo
-            restaurant={
-              data[selectedStationIndex].stations[activeRestaurantTab]
-            }
-          />
-        )}
+        {restaurantData &&
+          restaurantData[selectedStationIndex]?.stations[
+            activeRestaurantTab
+          ] && (
+            <RestaurantInfo
+              restaurant={
+                restaurantData[selectedStationIndex].stations[
+                  activeRestaurantTab
+                ]
+              }
+            />
+          )}
       </div>
     </div>
   )

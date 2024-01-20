@@ -5,10 +5,12 @@ import {
   StationsRequest,
   SuggestionResponse,
   RestaurantsRequest,
+  RoutesRequest,
 } from '../types'
 
 export type QueryStationsProps = {
   setRestaurantsRequest: (restaurantsRequest: RestaurantsRequest) => void
+  setRoutesRequest: (routesRequest: RoutesRequest) => void
 }
 
 export const useQueryStations = (props: QueryStationsProps) => {
@@ -33,6 +35,12 @@ export const useQueryStations = (props: QueryStationsProps) => {
         arrival_time: stationsRequest.arrival_time,
         purpose: stationsRequest.purpose,
       })
+
+      props.setRoutesRequest({
+        departure_stations: stationsRequest.departures,
+        destination_stations: stationArray,
+      })
+
       return response.data
     }
   )

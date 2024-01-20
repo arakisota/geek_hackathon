@@ -49,7 +49,20 @@ export type Genre = {
   catch: string
   name: string
 }
-export type RestaurantInfo = {}
+export type RoutesRequest = {
+  departure_stations: string[]
+  destination_stations: string[]
+}
+export type RoutesResponse = {
+  destinations: Destination[]
+}
+export type Destination = {
+  destination: string
+  routes: Stations[]
+}
+export type Stations = {
+  stations: LatLng[]
+}
 export type LatLng = {
   lat: number
   lng: number

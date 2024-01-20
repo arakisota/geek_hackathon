@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { GoogleMap, Marker, Polyline } from '@react-google-maps/api'
+import { LatLng, RestaurantsRequest, RoutesRequest } from '../types'
 import { mapStyle } from '../types/mapStyle'
 import { Form } from './Form'
 import { Plan } from './Plan'
-import { LatLng, RestaurantsRequest } from '../types'
 import { useMutateAuth, MutateAuthProps } from '../hooks/useMutateAuth'
 import { FaChevronDown, FaChevronRight } from 'react-icons/fa'
 
@@ -33,6 +33,7 @@ export const Map: React.FC<MapProps> = (props) => {
 
   const [restaurantsRequest, setRestaurantsRequest] =
     useState<RestaurantsRequest>()
+  const [routesRequest, setRoutesRequest] = useState<RoutesRequest>()
 
   const [isFormVisible, setIsFormVisible] = useState(true)
 
@@ -64,32 +65,10 @@ export const Map: React.FC<MapProps> = (props) => {
   }
 
   const [stationPositions, setStationPositions] = useState<LatLng[]>([])
-
-  const adjustMapCenter = (selectedPosition: LatLng) => {
-    if (mapRef.current) {
-      const currentZoom = mapRef.current.getZoom()
-      const offset = calculateOffsetBasedOnZoomLevel(
-        currentZoom ? currentZoom : 12
-      )
-      const newCenter = {
-        lat: selectedPosition.lat,
-        lng: selectedPosition.lng - offset,
-      }
-      mapRef.current.setCenter(newCenter)
-    }
-  }
-
-  const calculateOffsetBasedOnZoomLevel = (zoomLevel: number) => {
-    // ズームレベルに基づいて中心座標を左にずらすオフセットを計算
-    return 0.001 / Math.pow(2, zoomLevel - 10)
-  }
+  const [routePositions, setRoutePositions] = useState<LatLng[]>([])
 
   const handleStationSelect = (positions: LatLng[]) => {
     setStationPositions(positions)
-
-    if (positions.length > 0) {
-      adjustMapCenter(positions[0])
-    }
   }
 
   useEffect(() => {
@@ -120,6 +99,7 @@ export const Map: React.FC<MapProps> = (props) => {
               <Form
                 onStationSelect={handleStationSelect}
                 setRestaurantsRequest={setRestaurantsRequest}
+                setRoutesRequest={setRoutesRequest}
                 onSubmit={handleFormSubmit}
               />
             </div>
@@ -134,6 +114,7 @@ export const Map: React.FC<MapProps> = (props) => {
             <Plan
               onStationSelect={handleStationSelect}
               restaurantsRequest={restaurantsRequest}
+              routesRequest={routesRequest}
               onBack={handleBackToForm}
               onRestaurantsSelect={handleRestaurantsSelect}
               onActiveRestaurantIndexChange={handleActiveRestaurantIndexChange}
