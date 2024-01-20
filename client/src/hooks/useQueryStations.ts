@@ -37,7 +37,10 @@ export const useQueryStations = (props: QueryStationsProps) => {
       })
 
       props.setRoutesRequest({
-        departure_stations: stationsRequest.departures,
+        departure_stations: stationsRequest.departures.map((station) => station.replace(/駅$/, ''))
+        .filter((station, index, self) => {
+          return self.indexOf(station) === index
+        }),
         destination_stations: stationArray,
       })
 
