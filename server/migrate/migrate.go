@@ -18,7 +18,7 @@ func main() {
 	defer fmt.Println("Successfully Migrated")
 	defer database.CloseDB(db)
 	db.AutoMigrate(&model.User{}, &model.TransportRecord{}, &model.StationInfo{})
-	initializeTransportRecord(db)
+	// initializeTransportRecord(db)
 	initializeStationInfo(db)
 }
 
@@ -62,7 +62,7 @@ func initializeTransportRecord(db *gorm.DB) {
 
 func initializeStationInfo(db *gorm.DB) {
 	db.Model(&model.StationInfo{}).Where("1 = 1").Delete(&model.StationInfo{})
-	file, err := os.Open("./data/station_info.csv")
+	file, err := os.Open("./data/unique_station.csv")
 	if err != nil {
 		log.Fatal("Failed to load the CSV file", err)
 	}
@@ -75,18 +75,22 @@ func initializeStationInfo(db *gorm.DB) {
 		log.Fatal("An error occurred while reading the CSV file", err)
 	}
 
-	for _, record := range records {
+	for _, record := range records[1:] {
 		record := strings.Split(record[0], ",")
-		id, _ := strconv.ParseUint(record[0], 10, 64)
-		longitude, _ := strconv.ParseFloat(record[3], 64)
-		latitude, _ := strconv.ParseFloat(record[4], 64)
+		longitude, _ := strconv.ParseFloat(record[1], 64)
+		latitude, _ := strconv.ParseFloat(record[2], 64)
+		stationCode, _ := strconv.ParseUint(record[3], 10, 64)
+		prefectureCode, _ := strconv.ParseUint(record[5], 10, 64)
+
+		fmt.Println(record[0], record[1], record[2], record[3], record[4], record[5])
 
 		stationInfo := model.StationInfo{
-			Id:        uint(id),
-			Name:      record[1],
-			Yomi:      record[2],
-			Longitude: longitude,
-			Latitude:  latitude,
+			Name:           record[0],
+			Yomi:           record[4],
+			Longitude:      longitude,
+			Latitude:       latitude,
+			StationCode:    uint(stationCode),
+			PrefectureCode: uint(prefectureCode),
 		}
 
 		if err := db.Create(&stationInfo).Error; err != nil {

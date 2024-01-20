@@ -20,11 +20,12 @@ type StationsResponse struct {
 }
 
 type StationInfo struct {
-	Id        uint `gorm:"primaryKey;unique"`
-	Name      string
-	Yomi      string
-	Longitude float64
-	Latitude  float64
+	Name           string
+	Yomi           string
+	Longitude      float64
+	Latitude       float64
+	StationCode    uint `gorm:"primaryKey;unique"`
+	PrefectureCode uint
 }
 
 type SuggestStation struct {
