@@ -77,12 +77,10 @@ func initializeStationInfo(db *gorm.DB) {
 
 	for _, record := range records[1:] {
 		record := strings.Split(record[0], ",")
-		longitude, _ := strconv.ParseFloat(record[1], 64)
-		latitude, _ := strconv.ParseFloat(record[2], 64)
+		longitude, _ := strconv.ParseFloat(record[2], 64)
+		latitude, _ := strconv.ParseFloat(record[1], 64)
 		stationCode, _ := strconv.ParseUint(record[3], 10, 64)
 		prefectureCode, _ := strconv.ParseUint(record[5], 10, 64)
-
-		fmt.Println(record[0], record[1], record[2], record[3], record[4], record[5])
 
 		stationInfo := model.StationInfo{
 			Name:           record[0],

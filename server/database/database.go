@@ -24,7 +24,7 @@ func NewDB() *gorm.DB {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Println("Connceted")
+	fmt.Println("Connected")
 	return db
 }
 
