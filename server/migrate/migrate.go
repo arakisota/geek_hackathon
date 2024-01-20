@@ -17,9 +17,10 @@ func main() {
 	db := database.NewDB()
 	defer fmt.Println("Successfully Migrated")
 	defer database.CloseDB(db)
-	db.AutoMigrate(&model.User{}, &model.TransportRecord{}, &model.StationInfo{})
-	// initializeTransportRecord(db)
+	db.AutoMigrate(&model.User{}, &model.TransportRecord{}, &model.StationInfo{}, &model.NeighborDistance{})
+	initializeTransportRecord(db)
 	initializeStationInfo(db)
+	initializeNeighborDistance(db)
 }
 
 func initializeTransportRecord(db *gorm.DB) {
@@ -96,4 +97,37 @@ func initializeStationInfo(db *gorm.DB) {
 		}
 	}
 	fmt.Println("Successfully Initialized Station Info")
+}
+
+func initializeNeighborDistance(db *gorm.DB) {
+	db.Model(&model.NeighborDistance{}).Where("1 = 1").Delete(&model.NeighborDistance{})
+	file, err := os.Open("./data/neighbor_dist.csv")
+	if err != nil {
+		log.Fatal("Failed to load the CSV file", err)
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+	reader.Comma = '\t'
+	records, err := reader.ReadAll()
+	if err != nil {
+		log.Fatal("An error occurred while reading the CSV file", err)
+	}
+
+	for _, record := range records[1:] {
+		record := strings.Split(record[0], ",")
+		distance, _ := strconv.ParseFloat(record[2], 64)
+
+		neighborDistance := model.NeighborDistance{
+			Station1: record[0],
+			Station2: record[1],
+			Distance: distance,
+		}
+
+		if err := db.Create(&neighborDistance).Error; err != nil {
+			log.Fatal("Failed to create the data", err)
+		}
+	}
+
+	fmt.Println("Successfully Initialized Neighbor Distance")
 }

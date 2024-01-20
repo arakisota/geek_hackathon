@@ -12,7 +12,7 @@ import (
 // URLパスとControllerのアクションをマッピング
 // エンドポイントの定義
 
-func NewRouter(uc controller.IUserController, sc controller.IStationController, rc controller.IRestaurantController) *echo.Echo {
+func NewRouter(uc controller.IUserController, sc controller.IStationController, rc controller.IRestaurantController, roc controller.IRouteController) *echo.Echo {
 	e := echo.New()
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"http://localhost:3000", os.Getenv("FE_URL")},
@@ -35,5 +35,6 @@ func NewRouter(uc controller.IUserController, sc controller.IStationController, 
 	e.POST("/stations", sc.GetStations)
 	e.GET("/suggest", sc.GetSuggestion)
 	e.POST("/restaurants", rc.GetRestaurants)
+	e.POST("/routes", roc.GetRoutes)
 	return e
 }
