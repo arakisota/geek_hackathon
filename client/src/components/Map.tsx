@@ -62,6 +62,9 @@ export const Map: React.FC<MapProps> = (props) => {
 
   const handleActiveRestaurantIndexChange = (index: number) => {
     setSelectedRestaurantIndex(index)
+    if (mapRef.current) {
+      mapRef.current.setOptions({ maxZoom: 100 })
+    }
   }
 
   const [stationPositions, setStationPositions] = useState<LatLng[]>([])
@@ -87,7 +90,12 @@ export const Map: React.FC<MapProps> = (props) => {
       stationPositions.forEach((stationPosition) => {
         bounds.extend(stationPosition)
       })
-      mapRef.current.fitBounds(bounds)
+      if (stationPositions.length === 1) {
+        mapRef.current.setOptions({ maxZoom: 15 })
+      } else {
+        mapRef.current.setOptions({ maxZoom: 12 })
+      }
+      mapRef.current.fitBounds(bounds, 210)
     }
   }, [stationPositions])
 
