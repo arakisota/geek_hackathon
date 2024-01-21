@@ -5,6 +5,7 @@ import App from './App'
 import reportWebVitals from './reportWebVitals'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { LoadScript } from '@react-google-maps/api'
 
 const queryClient = new QueryClient({})
 
@@ -12,8 +13,12 @@ const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <App />
-      <ReactQueryDevtools initialIsOpen={false} />
+      <LoadScript
+        googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY as string}
+      >
+        <App />
+        <ReactQueryDevtools initialIsOpen={false} />
+      </LoadScript>
     </QueryClientProvider>
   </React.StrictMode>
 )
