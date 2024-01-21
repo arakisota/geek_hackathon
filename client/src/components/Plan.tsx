@@ -182,6 +182,13 @@ export const Plan: React.FC<PlanProps> = (props) => {
     </>
   )
 
+  const handleReset = () => {
+    onBack()
+    onStationSelect([])
+    onRestaurantsSelect([])
+    onStationSelectRoutes([])
+  }
+
   if (restaurantError || routesError) {
     return (
       <>
@@ -225,15 +232,7 @@ export const Plan: React.FC<PlanProps> = (props) => {
               {restaurantsRequest?.stations[index]}
             </button>
           ))}
-        <button
-          className={'px-4 py-2 bg-gray-200'}
-          onClick={() => {
-            onBack()
-            onStationSelect([])
-            onRestaurantsSelect([])
-            onStationSelectRoutes([])
-          }}
-        >
+        <button className={'px-4 py-2 bg-gray-200'} onClick={handleReset}>
           再入力する
         </button>
       </div>
