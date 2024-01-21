@@ -87,7 +87,12 @@ export const Map: React.FC<MapProps> = (props) => {
       stationPositions.forEach((stationPosition) => {
         bounds.extend(stationPosition)
       })
-      mapRef.current.fitBounds(bounds)
+      if (stationPositions.length === 1) {
+        mapRef.current.setOptions({ maxZoom: 15 })
+      } else {
+        mapRef.current.setOptions({ maxZoom: 12 })
+      }
+      mapRef.current.fitBounds(bounds, 210)
     }
   }, [stationPositions])
 
