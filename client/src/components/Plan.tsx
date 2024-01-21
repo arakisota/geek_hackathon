@@ -28,6 +28,7 @@ interface Restaurant {
   budget: string
   open: string
   coupon_urls: string
+  image_url: string
 }
 
 interface RestaurantInfoProps {
@@ -119,7 +120,7 @@ export const Plan: React.FC<PlanProps> = (props) => {
     onClick,
   }) => (
     <button
-      className={`px-4 py-2 ${
+      className={`px-9 py-3 ${
         isActive ? 'text-blue-500 border-b-2 border-blue-500' : 'text-gray-500'
       }`}
       onClick={() => onClick(index)}
@@ -160,15 +161,23 @@ export const Plan: React.FC<PlanProps> = (props) => {
         <a
           href={restaurant.coupon_urls}
           className="text-blue-500 hover:underline"
+          target="_blank"
+          rel="noopener noreferrer"
         >
           クーポン
         </a>
-        <img
-          className="mt-4 rounded shadow"
-          src={`https://maps.googleapis.com/maps/api/streetview?location=${restaurant.lat},${restaurant.lng}&size=400x400&key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}`}
-          // eslint-disable-next-line
-          alt="Street view of the restaurant"
-        />
+        <div className="flex overflow-x-auto gap-4">
+          <img
+            className="mt-4 rounded shadow flex-shrink-0 w-96"
+            src={`${restaurant.image_url}`}
+            alt="Additional"
+          />
+          <img
+            className="mt-4 rounded shadow flex-shrink-0"
+            src={`https://maps.googleapis.com/maps/api/streetview?location=${restaurant.lat},${restaurant.lng}&size=400x400&key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}`}
+            alt="Street view of the restaurant"
+          />
+        </div>
       </div>
     </>
   )

@@ -44,6 +44,7 @@ export type StationRestaurant = {
   open: string
   genre: Genre
   coupon_urls: string
+  image_url: string
 }
 export type Genre = {
   catch: string
