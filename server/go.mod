@@ -1,6 +1,6 @@
 module server
 
-go 1.21.5
+go 1.21.4
 
 require (
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0

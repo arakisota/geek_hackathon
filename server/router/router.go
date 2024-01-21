@@ -9,7 +9,10 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-func NewRouter(uc controller.IUserController) *echo.Echo {
+// URLパスとControllerのアクションをマッピング
+// エンドポイントの定義
+
+func NewRouter(uc controller.IUserController, sc controller.IStationController, rc controller.IRestaurantController, roc controller.IRouteController) *echo.Echo {
 	e := echo.New()
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"http://localhost:3000", os.Getenv("FE_URL")},
@@ -22,13 +25,18 @@ func NewRouter(uc controller.IUserController) *echo.Echo {
 		CookiePath:     "/",
 		CookieDomain:   os.Getenv("API_DOMAIN"),
 		CookieHTTPOnly: true,
-		// CookieSameSite: http.SameSiteNoneMode,
-		CookieSameSite: http.SameSiteDefaultMode, // postmanで確認する時
-		// CookieMaxAge:   60,
+		CookieSameSite: http.SameSiteNoneMode,
+		// CookieSameSite: http.SameSiteDefaultMode, // postmanで確認する時
+		CookieMaxAge:   60,
 	}))
 	e.POST("/signup", uc.SignUp)
 	e.POST("/login", uc.LogIn)
 	e.POST("/logout", uc.LogOut)
 	e.GET("/csrf", uc.CsrfToken)
+
+	e.POST("/stations", sc.GetStations)
+	e.GET("/suggest", sc.GetSuggestion)
+	e.POST("/restaurants", rc.GetRestaurants)
+	e.POST("/routes", roc.GetRoutes)
 	return e
 }
