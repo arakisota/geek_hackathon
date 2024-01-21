@@ -1,9 +1,7 @@
 import { FC, useState, FormEvent } from 'react'
-import {
-  ArrowPathIcon,
-} from '@heroicons/react/24/solid'
+import { ArrowPathIcon } from '@heroicons/react/24/solid'
 import { useMutateAuth, MutateAuthProps } from '../hooks/useMutateAuth'
-import togatherLogo from '../assets/logo_cream.png';
+import togatherLogo from '../assets/togather_logo_cream.png'
 
 export type AuthProps = {
   setIsLogined: (state: boolean) => void
@@ -13,23 +11,31 @@ export const Auth: FC<AuthProps> = ({ setIsLogined }) => {
   const [userId, setUserId] = useState('')
   const [pw, setPw] = useState('')
   const [isLogin, setIsLogin] = useState(true)
-  const { loginMutation, registerMutation } = useMutateAuth({ setIsLogined } as MutateAuthProps)
+  const { loginMutation, registerMutation } = useMutateAuth({
+    setIsLogined,
+  } as MutateAuthProps)
 
   const submitAuthHandler = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (isLogin) {
       loginMutation.mutate({ user_id: userId, password: pw })
     } else {
-      await registerMutation.mutateAsync({ user_id: userId, password: pw })
+      await registerMutation
+        .mutateAsync({ user_id: userId, password: pw })
         .then(() => loginMutation.mutate({ user_id: userId, password: pw }))
     }
   }
 
   return (
-    <div className="flex justify-center items-center flex-col min-h-screen text-gray-600 font-mono " style={{backgroundColor: '#F5F5F5'}}>
-      <img src={togatherLogo} alt="ToGather Logo" width="800" height="800"/>
+    <div
+      className="flex justify-center items-center flex-col min-h-screen text-gray-600 font-mono "
+      style={{ backgroundColor: '#F5F5F5' }}
+    >
+      <img src={togatherLogo} alt="ToGather Logo" width="800" height="800" />
 
-      <h2 className="my-6 text-2xl">{isLogin ? 'Login' : 'Create a new account'}</h2>
+      <h2 className="my-6 text-2xl">
+        {isLogin ? 'Login' : 'Create a new account'}
+      </h2>
       <form onSubmit={submitAuthHandler}>
         <div className="mb-4">
           <input
