@@ -60,6 +60,7 @@ export const Plan: React.FC<PlanProps> = (props) => {
     if (restaurantsRequest?.stations !== undefined) {
       queryRestaurants.mutate(restaurantsRequest)
     }
+    // eslint-disable-next-line
   }, [restaurantsRequest?.stations])
 
   const { queryRoutes } = useQueryRoutes()
@@ -73,6 +74,7 @@ export const Plan: React.FC<PlanProps> = (props) => {
     if (routesRequest?.destination_stations !== undefined) {
       queryRoutes.mutate(routesRequest)
     }
+    // eslint-disable-next-line
   }, [routesRequest?.destination_stations])
 
   const [selectedStationIndex, setSelectedStationIndex] = useState(0)
@@ -89,6 +91,7 @@ export const Plan: React.FC<PlanProps> = (props) => {
       .map((destination) => destination.routes)
 
     onStationSelectRoutes(newRoutesPositions)
+    // eslint-disable-next-line
   }, [selectedStationIndex, routesData, restaurantsRequest])
 
   useEffect(() => {
@@ -107,6 +110,7 @@ export const Plan: React.FC<PlanProps> = (props) => {
 
     // 選択されているレストランのインデックスを親コンポーネントに渡す
     onActiveRestaurantIndexChange(activeRestaurantTab)
+    // eslint-disable-next-line
   }, [selectedStationIndex, activeRestaurantTab, restaurantData])
 
   const TabButton: React.FC<TabButtonProps> = ({
@@ -125,7 +129,6 @@ export const Plan: React.FC<PlanProps> = (props) => {
   )
 
   const OpeningHours: React.FC<OpeningHoursProps> = ({ text }) => {
-    // 「）」の後に改行を入れて文字列を分割
     const lines = text
       .split('）')
       .map((line, index, array) =>
@@ -163,7 +166,8 @@ export const Plan: React.FC<PlanProps> = (props) => {
         <img
           className="mt-4 rounded shadow"
           src={`https://maps.googleapis.com/maps/api/streetview?location=${restaurant.lat},${restaurant.lng}&size=400x400&key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}`}
-          alt="Street View Image"
+          // eslint-disable-next-line
+          alt="Street view of the restaurant"
         />
       </div>
     </>

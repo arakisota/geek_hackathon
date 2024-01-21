@@ -1,9 +1,5 @@
 import { FC, useState, FormEvent } from 'react'
-import {
-  ArrowRightOnRectangleIcon,
-  ArrowPathIcon,
-  CheckBadgeIcon,
-} from '@heroicons/react/24/solid'
+import { ArrowPathIcon, CheckBadgeIcon } from '@heroicons/react/24/solid'
 import { useMutateAuth, MutateAuthProps } from '../hooks/useMutateAuth'
 
 export type AuthProps = {
