@@ -56,6 +56,7 @@ type Station struct {
 	Open       string  `json:"open"`
 	Genre      Genre   `json:"genre"`
 	CouponUrls string  `json:"coupon_urls"`
+	ImageUrl   string  `json:"image_url"`
 }
 
 // クライアントへのレスポンスデータを定義
