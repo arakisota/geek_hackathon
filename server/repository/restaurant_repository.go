@@ -39,7 +39,7 @@ func (rr *RestaurantRepository) GetStationCoordinates(station string) ([]model.S
 
 const (
 	URL_TEMPLATE = "http://webservice.recruit.co.jp/hotpepper/gourmet/v1/?key=%s&format=json&lat=%f&lng=%f&range=%d&count=%d&order=4"
-	RANGE        = "3"
+	RANGE        = "2"
 	COUNT        = 5
 )
 
@@ -83,6 +83,7 @@ func (rr *RestaurantRepository) GetRestaurants(cr model.ClientRequest) ([]model.
 				Open:       shop.(map[string]interface{})["open"].(string),
 				Genre:      Genre,
 				CouponUrls: shop.(map[string]interface{})["coupon_urls"].(map[string]interface{})["pc"].(string),
+				ImageUrl:   shop.(map[string]interface{})["photo"].(map[string]interface{})["pc"].(map[string]interface{})["l"].(string),
 			}
 			result = append(result, newResponse)
 		}
