@@ -1,5 +1,9 @@
-# geek_hackathon
-技育ハッカソン
+# 開発アプリ 「ToGather」
+<img src="client/src/assets/togather_logo_cream.png" width="500">
+
+- [発表資料](https://www.canva.com/design/DAF6evopcIo/UdRYYtwNRO8SzdgSl_snfg/edit?utm_content=DAF6evopcIo&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
+- [X](https://twitter.com/geek_pjt/status/1749003473793028118?ref_src=twsrc%5Etfw%7Ctwcamp%5Etweetembed%7Ctwterm%5E1749003473793028118%7Ctwgr%5Edda1fefe313cc4c52629fdc55e6bdd48fd263fad%7Ctwcon%5Es1_c10&ref_url=https%3A%2F%2Fpublish.twitter.com%2F%3Furl%3Dhttps%3A%2F%2Ftwitter.com%2Fgeek_pjt%2Fstatus%2F1749003473793028118)
+- [アプリURL](https://geek-hackathon-psi.vercel.app/)
 
 ## git 関連
 
