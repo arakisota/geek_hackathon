@@ -40,9 +40,6 @@ func (ru *routeUsecase) GetRoute(request model.RouteRequest) (model.RouteRespons
 		graph[mapStation[edge.Station1]] = append(graph[mapStation[edge.Station1]], Pair{mapStation[edge.Station2], edge.Distance})
 		graph[mapStation[edge.Station2]] = append(graph[mapStation[edge.Station2]], Pair{mapStation[edge.Station1], edge.Distance})
 	}
-	
-	fmt.Println(stations[117])
-	fmt.Println(graph[117])
 
 	response := model.RouteResponse{}
 
@@ -98,7 +95,6 @@ func (pq *PriorityQueue) Pop() interface{} {
 }
 
 func dijkstra(mapStation map[string]uint, graph [][]Pair, depStation string, desStation string) []uint {
-	fmt.Println(depStation, desStation)
 	pq := make(PriorityQueue, 0)
 	heap.Push(&pq, Pair{mapStation[depStation], 0})
 	dist := make([]float64, len(graph))
@@ -121,7 +117,6 @@ func dijkstra(mapStation map[string]uint, graph [][]Pair, depStation string, des
 			}
 		}
 	}
-	fmt.Println(dist[mapStation[desStation]])
 
 	route := make([]uint, 0)
 	current := mapStation[desStation]

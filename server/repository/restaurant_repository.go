@@ -3,7 +3,7 @@ package repository
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 
@@ -60,7 +60,7 @@ func (rr *RestaurantRepository) GetRestaurants(cr model.ClientRequest) ([]model.
 		}
 		defer resp.Body.Close()
 
-		body, err := ioutil.ReadAll(resp.Body)
+		body, _ := io.ReadAll(resp.Body)
 
 		var apiResult interface{}
 		if err := json.Unmarshal(body, &apiResult); err != nil {

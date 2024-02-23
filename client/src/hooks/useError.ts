@@ -2,6 +2,7 @@ import axios from 'axios'
 import { CsrfToken } from '../types'
 
 export const useError = () => {
+  // eslint-disable-next-line
   const getCsrfToken = async () => {
     const { data } = await axios.get<CsrfToken>(
       `${process.env.REACT_APP_API_URL}/csrf`
@@ -11,7 +12,7 @@ export const useError = () => {
   const switchErrorHandling = (msg: string) => {
     switch (msg) {
       case 'invalid csrf token':
-        getCsrfToken()
+        // getCsrfToken()
         alert('CSRF token is invalid, please try again')
         break
       case 'invalid or expired jwt':

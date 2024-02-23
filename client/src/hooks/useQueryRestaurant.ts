@@ -16,7 +16,7 @@ export const useQueryRestaurants = () => {
       `${process.env.REACT_APP_API_URL}/restaurants`,
       restaurantsRequest
     )
-    console.log(response.data)
+    // console.log(response.data)
     return response.data
   })
 
