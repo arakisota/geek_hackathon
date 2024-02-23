@@ -72,7 +72,7 @@ export const Map: React.FC<MapProps> = (props) => {
     (Stations[] | undefined)[]
   >([])
 
-  console.log(routePositions)
+  // console.log(routePositions)
 
   const handleStationSelect = (positions: LatLng[]) => {
     setStationPositions(positions)

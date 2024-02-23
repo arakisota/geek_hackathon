@@ -143,7 +143,7 @@ export const Form: React.FC<FormProps> = (props) => {
     onStationSelect(newPositions)
   }
 
-  console.log()
+  // console.log()
 
   const peopleOptions = []
   for (let i = 1; i <= 50; i++) {
