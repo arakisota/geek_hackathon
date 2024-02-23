@@ -4,14 +4,17 @@ import { useMutateAuth, MutateAuthProps } from '../hooks/useMutateAuth'
 import togatherLogo from '../assets/togather_logo_cream.png'
 
 export type AuthProps = {
+  roomId: string
+  setRoomId: (roomid: string) => void
   setIsLogined: (state: boolean) => void
 }
 
-export const Auth: FC<AuthProps> = ({ setIsLogined }) => {
+export const Auth: FC<AuthProps> = ({ roomId, setRoomId, setIsLogined }) => {
   const [userId, setUserId] = useState('')
   const [pw, setPw] = useState('')
   const [isLogin, setIsLogin] = useState(true)
   const { loginMutation, registerMutation } = useMutateAuth({
+    roomId,
     setIsLogined,
   } as MutateAuthProps)
 
@@ -46,6 +49,17 @@ export const Auth: FC<AuthProps> = ({ setIsLogined }) => {
             placeholder="UserID"
             onChange={(e) => setUserId(e.target.value)}
             value={userId}
+          />
+        </div>
+        <div className="mb-4">
+          <input
+            className="mb-4 px-4 text-lg py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-black-500 transition-all w-80"
+            name="room_id"
+            type="text"
+            autoFocus
+            placeholder="RoomID"
+            onChange={(e) => setRoomId(e.target.value)}
+            value={roomId}
           />
         </div>
         <div className="mb-4">
