@@ -12,7 +12,7 @@ function App() {
       )
       axios.defaults.headers.common['X-CSRF-Token'] = data.csrf_token
     }
-    getCsrfToken()
+    // getCsrfToken()
   }, [])
   return <Home />
 }

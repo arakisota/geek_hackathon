@@ -11,7 +11,7 @@ export const useError = () => {
   const switchErrorHandling = (msg: string) => {
     switch (msg) {
       case 'invalid csrf token':
-        getCsrfToken()
+        // getCsrfToken()
         alert('CSRF token is invalid, please try again')
         break
       case 'invalid or expired jwt':
