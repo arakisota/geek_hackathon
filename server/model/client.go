@@ -1,6 +1,7 @@
 package model
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 
@@ -11,7 +12,7 @@ type Client struct {
     WS     *websocket.Conn
     SendCh chan []byte
     UserId string
-    RoomId string  // クライアントが属する部屋のID
+    RoomId string
 }
 
 func NewClient(ws *websocket.Conn, userId, roomId string) *Client {
@@ -36,8 +37,28 @@ func (c *Client) ReadLoop(broadCast chan<- *Message, unregister chan<- *Client) 
 			break
 		}
 
-		messageWithUsername := fmt.Sprintf("{\"username\": \"%s\", \"message\": \"%s\"}", c.UserId, string(msg))
-        broadCast <- &Message{RoomId: c.RoomId, Content: []byte(messageWithUsername)}
+		var receivedMessage struct {
+			Type    string `json:"type"`
+			Content string `json:"content"`
+		}
+		if err := json.Unmarshal(msg, &receivedMessage); err != nil {
+			log.Printf("error unmarshaling message: %v", err)
+			continue
+		}
+
+		switch receivedMessage.Type {
+		case "login":
+			messageLogin := fmt.Sprintf("User %s login to room %s", c.UserId, c.RoomId)
+			broadCast <- &Message{RoomId: c.RoomId, Content: []byte(messageLogin)}
+		case "logout":
+			messageLogout := fmt.Sprintf("User %s logout from room %s", c.UserId, c.RoomId)
+			broadCast <- &Message{RoomId: c.RoomId, Content: []byte(messageLogout)}
+		case "message":
+			messageWithUsername := fmt.Sprintf("{\"username\": \"%s\", \"message\": \"%s\"}", c.UserId, receivedMessage.Content)
+			broadCast <- &Message{RoomId: c.RoomId, Content: []byte(messageWithUsername)}
+		default:
+			log.Printf("Unknown message type: %s", receivedMessage.Type)
+		}
 	}
 }
 
