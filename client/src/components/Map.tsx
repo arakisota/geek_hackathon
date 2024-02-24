@@ -9,6 +9,8 @@ import { FaChevronDown, FaChevronRight } from 'react-icons/fa'
 
 type MapProps = {
   setIsLogined: (state: boolean) => void
+  ws: WebSocket | null
+  setWs: (ws: WebSocket | null) => void
 }
 
 const containerStyle = {
@@ -21,10 +23,13 @@ const defaultCenter = { lat: 35.6895, lng: 139.6917 }
 export const Map: React.FC<MapProps> = (props) => {
   const mapRef = useRef<google.maps.Map>()
 
-  const { setIsLogined } = props
+  const { setIsLogined, ws, setWs } = props
 
   const { logoutMutation } = useMutateAuth({
+    roomId: '',
     setIsLogined,
+    ws,
+    setWs,
   } as MutateAuthProps)
 
   const logout = async () => {

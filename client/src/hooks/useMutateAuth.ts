@@ -6,10 +6,12 @@ import { useError } from '../hooks/useError'
 export type MutateAuthProps = {
   roomId: string
   setIsLogined: (state: boolean) => void
+  ws: WebSocket | null
+  setWs: (ws: WebSocket | null) => void
 }
 
 export const useMutateAuth = (props: MutateAuthProps) => {
-  const { roomId, setIsLogined } = props
+  const { roomId, setIsLogined, ws, setWs } = props
 
   const { switchErrorHandling } = useError()
   const loginMutation = useMutation(
@@ -51,6 +53,15 @@ export const useMutateAuth = (props: MutateAuthProps) => {
     async () => await axios.post(`${process.env.REACT_APP_API_URL}/logout`),
     {
       onSuccess: () => {
+        if (ws) {
+          const logoutMessage = JSON.stringify({
+            type: 'logout',
+            content: '',
+          })
+          ws.send(logoutMessage)
+          ws.close(1000)
+          setWs(null)
+        }
         setIsLogined(false)
         localStorage.removeItem('token')
       },

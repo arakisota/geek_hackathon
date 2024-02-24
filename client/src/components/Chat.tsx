@@ -1,13 +1,13 @@
-// src/App.tsx
 import React, { useState, useEffect } from 'react'
 
 export type ChatProps = {
   roomId: string
+  ws: WebSocket | null
+  setWs: (ws: WebSocket | null) => void
 }
 
-export const Chat: React.FC<ChatProps> = ({ roomId }) => {
+export const Chat: React.FC<ChatProps> = ({ roomId, ws, setWs }) => {
   const token = localStorage.getItem('token')
-  const [ws, setWs] = useState<WebSocket | null>(null)
   const [messages, setMessages] = useState<string[]>([])
   const [input, setInput] = useState('')
 
@@ -15,12 +15,22 @@ export const Chat: React.FC<ChatProps> = ({ roomId }) => {
     const websocket = new WebSocket(
       `ws://localhost:8080/ws?token=${token}&room_id=${roomId}`
     )
+
+    websocket.onopen = () => {
+      const loginMessage = JSON.stringify({
+        type: 'login',
+        content: '',
+      })
+      websocket.send(loginMessage)
+    }
+
     websocket.onmessage = (event) => {
       setMessages((prev) => [...prev, event.data])
     }
     setWs(websocket)
 
     return () => {
+      websocket.onopen = null
       websocket.onmessage = null
       //   websocket.close();
     }
@@ -28,7 +38,11 @@ export const Chat: React.FC<ChatProps> = ({ roomId }) => {
 
   const sendMessage = () => {
     if (ws && input.trim()) {
-      ws.send(input)
+      const chatMessage = JSON.stringify({
+        type: 'message',
+        content: input,
+      })
+      ws.send(chatMessage)
       setInput('')
     }
   }
