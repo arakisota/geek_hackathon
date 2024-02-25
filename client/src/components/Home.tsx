@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Auth } from './Auth'
 import { Map } from './Map'
-import { Chat } from './Chat'
 
 export const Home = () => {
   const [ws, setWs] = useState<WebSocket | null>(null)
@@ -12,15 +11,12 @@ export const Home = () => {
     <>
       <>
         {isLogined ? (
-          <>
-            <Chat
-              roomId={roomId}
-              setIsLogined={setIsLogined}
-              ws={ws}
-              setWs={setWs}
-            />
-            <Map setIsLogined={setIsLogined} ws={ws} setWs={setWs} />
-          </>
+          <Map
+            roomId={roomId}
+            setIsLogined={setIsLogined}
+            ws={ws}
+            setWs={setWs}
+          />
         ) : (
           <Auth
             roomId={roomId}

@@ -1,13 +1,27 @@
 import React, { useEffect, useState } from 'react'
-import { LatLng, RestaurantsRequest, RoutesRequest, Stations } from '../types'
-import { useQueryRestaurants } from '../hooks/useQueryRestaurant'
-import { useQueryRoutes } from '../hooks/useQueryRoutes'
+import {
+  LatLng,
+  RestaurantsRequest,
+  RestaurantsResponse,
+  RoutesRequest,
+  RoutesResponse,
+  Stations,
+} from '../types'
+import {
+  QueryRestaurantsProps,
+  useQueryRestaurants,
+} from '../hooks/useQueryRestaurant'
+import { QueryRoutesProps, useQueryRoutes } from '../hooks/useQueryRoutes'
 
 type PlanProps = {
+  roomId: string
   onStationSelect: (positions: LatLng[]) => void
   onStationSelectRoutes: (positions: (Stations[] | undefined)[]) => void
   restaurantsRequest: RestaurantsRequest | undefined
+  restaurantData: RestaurantsResponse | undefined
   routesRequest: RoutesRequest | undefined
+  routesData: RoutesResponse | undefined
+  destStations: string[]
   onBack: () => void
   onRestaurantsSelect: (coordinates: LatLng[]) => void
   onActiveRestaurantIndexChange: (index: number) => void
@@ -41,22 +55,29 @@ interface OpeningHoursProps {
 
 export const Plan: React.FC<PlanProps> = (props) => {
   const {
+    roomId,
     onStationSelect,
     onStationSelectRoutes,
     restaurantsRequest,
+    restaurantData,
     routesRequest,
+    routesData,
+    destStations,
     onBack,
     onRestaurantsSelect,
     onActiveRestaurantIndexChange,
   } = props
 
-  const { queryRestaurants } = useQueryRestaurants()
+  // -------------------------- Restaurants --------------------------
+  // '/staions'エンドポイントのレスポンスに応じて駅周辺のお店情報を取得
+  const { queryRestaurants } = useQueryRestaurants({
+    roomId,
+  } as QueryRestaurantsProps)
   const {
-    data: restaurantData,
+    data: _restaurantData,
     isLoading: restaurantIsLoading,
     error: restaurantError,
   } = queryRestaurants
-
   useEffect(() => {
     if (restaurantsRequest?.stations !== undefined) {
       queryRestaurants.mutate(restaurantsRequest)
@@ -64,13 +85,16 @@ export const Plan: React.FC<PlanProps> = (props) => {
     // eslint-disable-next-line
   }, [restaurantsRequest?.stations])
 
-  const { queryRoutes } = useQueryRoutes()
+  // -------------------------- Routes --------------------------
+  // '/staions'エンドポイントのレスポンスに応じて各出発駅から目的地までの経路情報を取得
+  const { queryRoutes } = useQueryRoutes({
+    roomId,
+  } as QueryRoutesProps)
   const {
-    data: routesData,
+    data: _routesData,
     isLoading: routesIsLoading,
     error: routesError,
   } = queryRoutes
-
   useEffect(() => {
     if (routesRequest?.destination_stations !== undefined) {
       queryRoutes.mutate(routesRequest)
@@ -78,14 +102,14 @@ export const Plan: React.FC<PlanProps> = (props) => {
     // eslint-disable-next-line
   }, [routesRequest?.destination_stations])
 
+  // -------------------------- Station --------------------------
+  // プラン上で現在選択している駅、地図上でレストランのマーカー表示、経路表示で利用
   const [selectedStationIndex, setSelectedStationIndex] = useState(0)
-  const [activeRestaurantTab, setActiveRestaurantTab] = useState(0)
-
   useEffect(() => {
-    if (!routesData || !restaurantsRequest) {
+    if (!routesData || destStations.length === 0) {
       return
     }
-    const selectedStation = restaurantsRequest.stations[selectedStationIndex]
+    const selectedStation = destStations[selectedStationIndex]
     onStationSelectRoutes([])
     const newRoutesPositions = routesData.destinations
       .filter((destination) => destination.destination === selectedStation)
@@ -93,8 +117,11 @@ export const Plan: React.FC<PlanProps> = (props) => {
 
     onStationSelectRoutes(newRoutesPositions)
     // eslint-disable-next-line
-  }, [selectedStationIndex, routesData, restaurantsRequest])
+  }, [selectedStationIndex, routesData, destStations])
 
+  // -------------------------- RestaurantTab --------------------------
+  // プラン上で現在閲覧しているレストラン、地図上でマーカーを強調させるために使用
+  const [activeRestaurantTab, setActiveRestaurantTab] = useState(0)
   useEffect(() => {
     if (restaurantData === undefined) {
       return
@@ -104,11 +131,9 @@ export const Plan: React.FC<PlanProps> = (props) => {
       lat: restaurant.lat,
       lng: restaurant.lng,
     }))
-
     if (restaurantCoordinates) {
       onRestaurantsSelect(restaurantCoordinates)
     }
-
     // 選択されているレストランのインデックスを親コンポーネントに渡す
     onActiveRestaurantIndexChange(activeRestaurantTab)
     // eslint-disable-next-line
@@ -229,7 +254,7 @@ export const Plan: React.FC<PlanProps> = (props) => {
                 setActiveRestaurantTab(0)
               }}
             >
-              {restaurantsRequest?.stations[index]}
+              {destStations[index]}
             </button>
           ))}
         <button className={'px-4 py-2 bg-gray-200'} onClick={handleReset}>
