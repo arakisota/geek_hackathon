@@ -9,19 +9,19 @@ import (
 )
 
 type Client struct {
-    WS     *websocket.Conn
-    SendCh chan *Message
-    UserId string
-    RoomId string
+	WS     *websocket.Conn
+	SendCh chan *Message
+	UserId string
+	RoomId string
 }
 
 func NewClient(ws *websocket.Conn, userId, roomId string) *Client {
-    return &Client{
-        WS:       ws,
-        SendCh:   make(chan *Message),
-        UserId:   userId,
-        RoomId:   roomId,
-    }
+	return &Client{
+		WS:     ws,
+		SendCh: make(chan *Message),
+		UserId: userId,
+		RoomId: roomId,
+	}
 }
 
 func (c *Client) ReadLoop(broadCast chan<- *Message, unregister chan<- *Client) {
@@ -84,12 +84,12 @@ func (c *Client) ReadLoop(broadCast chan<- *Message, unregister chan<- *Client) 
 		case "message":
 			messageWithUserId := struct {
 				Type    string `json:"type"`
-				UserId string `json:"userId"`
-				Message  string `json:"message"`
+				UserId  string `json:"userId"`
+				Message string `json:"message"`
 			}{
 				Type:    receivedMessage.Type,
-				UserId: c.UserId,
-				Message:  receivedMessage.Content,
+				UserId:  c.UserId,
+				Message: receivedMessage.Content,
 			}
 			jsonData, err := json.Marshal(messageWithUserId)
 			if err != nil {
