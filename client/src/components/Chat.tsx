@@ -1,15 +1,26 @@
 import React, { useState, useEffect } from 'react'
+import { useMutateAuth, MutateAuthProps } from '../hooks/useMutateAuth'
 
 export type ChatProps = {
   roomId: string
+  setIsLogined: (state: boolean) => void
   ws: WebSocket | null
   setWs: (ws: WebSocket | null) => void
 }
 
-export const Chat: React.FC<ChatProps> = ({ roomId, ws, setWs }) => {
+export const Chat: React.FC<ChatProps> = (props: ChatProps) => {
+  const { roomId, setIsLogined, ws, setWs } = props
+
   const token = localStorage.getItem('token')
   const [messages, setMessages] = useState<string[]>([])
   const [input, setInput] = useState('')
+
+  const { logoutMutation } = useMutateAuth({
+    roomId,
+    setIsLogined,
+    ws,
+    setWs,
+  } as MutateAuthProps)
 
   useEffect(() => {
     const websocket = new WebSocket(
@@ -25,7 +36,29 @@ export const Chat: React.FC<ChatProps> = ({ roomId, ws, setWs }) => {
     }
 
     websocket.onmessage = (event) => {
-      setMessages((prev) => [...prev, event.data])
+      const data = JSON.parse(event.data)
+
+      switch (data.type) {
+        case 'login':
+          setMessages((prev) => [...prev, event.data])
+          break
+
+        case 'logout':
+          if (data.userId == roomId) {
+            alert('Host logout!')
+            logoutMutation.mutateAsync()
+            break
+          }
+          setMessages((prev) => [...prev, event.data])
+          break
+
+        case 'message':
+          setMessages((prev) => [...prev, event.data])
+          break
+
+        default:
+          console.log('Unknown message type:', data.type)
+      }
     }
     setWs(websocket)
 

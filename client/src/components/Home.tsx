@@ -13,7 +13,12 @@ export const Home = () => {
       <>
         {isLogined ? (
           <>
-            <Chat roomId={roomId} ws={ws} setWs={setWs} />
+            <Chat
+              roomId={roomId}
+              setIsLogined={setIsLogined}
+              ws={ws}
+              setWs={setWs}
+            />
             <Map setIsLogined={setIsLogined} ws={ws} setWs={setWs} />
           </>
         ) : (
