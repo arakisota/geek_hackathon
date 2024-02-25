@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+option go_package = "server/suggest/server/suggestpb";
+
+package suggest;
+
+// Hotpepperグルメで取得したお店を元にプランを提案する
+service Suggest {
+    rpc Suggest(SuggestRequest) returns (SuggestResponse);
+}
+
+// お店のジャンル
+message Genre {
+    string catch = 1;
+    string name = 2;
+}
+
+// 各駅のお店
+message Shop {
+  string name = 1;
+  string address = 2;
+  string access = 3;
+  double latitude = 4;
+  double longitude = 5;
+  string budget = 6;
+  string open = 7;
+  Genre genre = 8;
+  string coupon_urls = 9;
+  string image_url = 10;
+}
+
+message SuggestRequest {
+  repeated Shop stations = 1;
+}
+
+message SuggestResponse {
+    string plan = 1;
+}
