@@ -1,5 +1,7 @@
 package model
 
+import "encoding/json"
+
 type Hub struct {
     Rooms        map[string]map[*Client]bool  
     RegisterCh   chan *Client
@@ -9,7 +11,7 @@ type Hub struct {
 
 type Message struct {
     RoomId  string
-    Content []byte
+    Content json.RawMessage
 }
 
 func NewHub() *Hub {
@@ -39,7 +41,7 @@ func (h *Hub) RunLoop() {
         case message := <-h.BroadcastCh:
             for client := range h.Rooms[message.RoomId] {
                 select {
-                case client.SendCh <- message.Content:
+                case client.SendCh <- message:
                 default:
                     close(client.SendCh)
                     delete(h.Rooms[message.RoomId], client)

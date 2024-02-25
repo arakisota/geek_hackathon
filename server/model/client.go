@@ -10,7 +10,7 @@ import (
 
 type Client struct {
     WS     *websocket.Conn
-    SendCh chan []byte
+    SendCh chan *Message
     UserId string
     RoomId string
 }
@@ -18,7 +18,7 @@ type Client struct {
 func NewClient(ws *websocket.Conn, userId, roomId string) *Client {
     return &Client{
         WS:       ws,
-        SendCh:   make(chan []byte),
+        SendCh:   make(chan *Message),
         UserId:   userId,
         RoomId:   roomId,
     }
@@ -48,14 +48,55 @@ func (c *Client) ReadLoop(broadCast chan<- *Message, unregister chan<- *Client) 
 
 		switch receivedMessage.Type {
 		case "login":
-			messageLogin := fmt.Sprintf("User %s login to room %s", c.UserId, c.RoomId)
-			broadCast <- &Message{RoomId: c.RoomId, Content: []byte(messageLogin)}
+			loginMessage := struct {
+				Type    string `json:"type"`
+				UserId  string `json:"userId"`
+				Message string `json:"message"`
+			}{
+				Type:    receivedMessage.Type,
+				UserId:  c.UserId,
+				Message: fmt.Sprintf("User %s has logged in to room %s", c.UserId, c.RoomId),
+			}
+			jsonData, err := json.Marshal(loginMessage)
+			if err != nil {
+				log.Printf("error marshaling login message: %v", err)
+				continue
+			}
+			broadCast <- &Message{RoomId: c.RoomId, Content: jsonData}
+
 		case "logout":
-			messageLogout := fmt.Sprintf("User %s logout from room %s", c.UserId, c.RoomId)
-			broadCast <- &Message{RoomId: c.RoomId, Content: []byte(messageLogout)}
+			logoutMessage := struct {
+				Type    string `json:"type"`
+				UserId  string `json:"userId"`
+				Message string `json:"message"`
+			}{
+				Type:    receivedMessage.Type,
+				UserId:  c.UserId,
+				Message: fmt.Sprintf("User %s has logged out from room %s", c.UserId, c.RoomId),
+			}
+			jsonData, err := json.Marshal(logoutMessage)
+			if err != nil {
+				log.Printf("error marshaling logout message: %v", err)
+				continue
+			}
+			broadCast <- &Message{RoomId: c.RoomId, Content: jsonData}
+
 		case "message":
-			messageWithUsername := fmt.Sprintf("{\"username\": \"%s\", \"message\": \"%s\"}", c.UserId, receivedMessage.Content)
-			broadCast <- &Message{RoomId: c.RoomId, Content: []byte(messageWithUsername)}
+			messageWithUserId := struct {
+				Type    string `json:"type"`
+				UserId string `json:"userId"`
+				Message  string `json:"message"`
+			}{
+				Type:    receivedMessage.Type,
+				UserId: c.UserId,
+				Message:  receivedMessage.Content,
+			}
+			jsonData, err := json.Marshal(messageWithUserId)
+			if err != nil {
+				log.Printf("error marshaling message: %v", err)
+				continue
+			}
+			broadCast <- &Message{RoomId: c.RoomId, Content: jsonData}
 		default:
 			log.Printf("Unknown message type: %s", receivedMessage.Type)
 		}
@@ -72,10 +113,18 @@ func (c *Client) WriteLoop() {
 		if err != nil {
 			return
 		}
-		w.Write(message)
+		w.Write(message.Content)
 
-		for i := 0; i < len(c.SendCh); i++ {
-			w.Write(<-c.SendCh)
+		n := len(c.SendCh)
+		for i := 0; i < n; i++ {
+			message, ok := <-c.SendCh
+			if !ok {
+				break
+			}
+			if _, err := w.Write(message.Content); err != nil {
+				log.Printf("error writing message: %v", err)
+				return
+			}
 		}
 		if err := w.Close(); err != nil {
 			return
