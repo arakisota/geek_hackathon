@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"server/model"
@@ -18,10 +19,11 @@ type IRestaurantController interface {
 
 type RestaurantController struct {
 	Usecase usecase.IRestaurantUsecase
+	hub     *model.Hub
 }
 
-func NewRestaurantController(uc usecase.IRestaurantUsecase) IRestaurantController {
-	return &RestaurantController{uc}
+func NewRestaurantController(uc usecase.IRestaurantUsecase, hub *model.Hub) IRestaurantController {
+	return &RestaurantController{uc, hub}
 }
 
 func (rc *RestaurantController) GetRestaurants(ctx echo.Context) error {
@@ -36,6 +38,14 @@ func (rc *RestaurantController) GetRestaurants(ctx echo.Context) error {
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, err.Error())
 	}
+
+	restaurantsJSON, err := json.Marshal(restaurants)
+    if err != nil {
+        return ctx.JSON(http.StatusInternalServerError, err.Error())
+    }
+
+	roomId := ctx.QueryParam("room_id")
+    rc.hub.BroadcastToRoom("restaurants", roomId, restaurantsJSON)
 
 	return ctx.JSON(http.StatusOK, restaurants)
 }

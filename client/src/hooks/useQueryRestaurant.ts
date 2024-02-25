@@ -2,7 +2,12 @@ import axios from 'axios'
 import { useMutation } from '@tanstack/react-query'
 import { RestaurantsRequest, RestaurantsResponse } from '../types'
 
-export const useQueryRestaurants = () => {
+export type QueryRestaurantsProps = {
+  roomId: string
+}
+
+export const useQueryRestaurants = (props: QueryRestaurantsProps) => {
+  const { roomId } = props
   const queryRestaurants = useMutation<
     RestaurantsResponse,
     Error,
@@ -13,10 +18,9 @@ export const useQueryRestaurants = () => {
       10
     )
     const response = await axios.post<RestaurantsResponse>(
-      `${process.env.REACT_APP_API_URL}/restaurants`,
+      `${process.env.REACT_APP_API_URL}/restaurants?room_id=${roomId}`,
       restaurantsRequest
     )
-    // console.log(response.data)
     return response.data
   })
 

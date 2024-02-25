@@ -13,6 +13,9 @@ import (
 func main() {
 	db := database.NewDB()
 	roomManager := *model.NewRoomManager()
+	hub := model.NewHub()
+	go hub.RunLoop()
+
 	userValidator := validator.NewUserValidator()
 	userRepository := repository.NewUserRepository(db)
 	stationRepository := repository.NewStationRepository(db)
@@ -24,11 +27,9 @@ func main() {
 	routeUsecase := usecase.NewRouteUsecase(routeRepository)
 	userController := controller.NewUserController(userUsecase)
 	stationController := controller.NewStationController(stationUsecase)
-	restaurantController := controller.NewRestaurantController(restaurantUsecase)
-	routeController := controller.NewRouteController(routeUsecase)
+	restaurantController := controller.NewRestaurantController(restaurantUsecase, hub)
+	routeController := controller.NewRouteController(routeUsecase, hub)
 
-	hub := model.NewHub()
-	go hub.RunLoop()
 	websocketController := controller.NewWebsocketController(hub, roomManager)
 
 	e := router.NewRouter(userController, stationController, restaurantController, routeController, websocketController)
