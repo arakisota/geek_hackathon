@@ -4,13 +4,15 @@ import { useMutateAuth, MutateAuthProps } from '../hooks/useMutateAuth'
 import togatherLogo from '../assets/togather_logo_cream.png'
 
 export type AuthProps = {
+  userId: string
+  setUserId: (userId: string) => void
   roomId: string
   setRoomId: (roomid: string) => void
   setIsLogined: (state: boolean) => void
 }
 
-export const Auth: FC<AuthProps> = ({ roomId, setRoomId, setIsLogined }) => {
-  const [userId, setUserId] = useState('')
+export const Auth: FC<AuthProps> = (props: AuthProps) => {
+  const { userId, setUserId, roomId, setRoomId, setIsLogined } = props
   const [pw, setPw] = useState('')
   const [isLogin, setIsLogin] = useState(true)
   const { loginMutation, registerMutation } = useMutateAuth({
