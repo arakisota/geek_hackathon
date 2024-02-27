@@ -36,6 +36,6 @@ func (rc *routeController) GetRoutes(c echo.Context) error {
         return c.JSON(http.StatusInternalServerError, err.Error())
     }
 	roomId := c.QueryParam("room_id")
-    rc.Hub.BroadcastToRoom("routes", roomId, routesJSON)
+    rc.Hub.BroadcastToRoom("routes", roomId, routesJSON, nil)
 	return c.JSON(http.StatusOK, routes)
 }

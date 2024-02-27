@@ -2,7 +2,6 @@ package controller
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"server/model"
 	"server/usecase"
@@ -32,20 +31,23 @@ func (rc *RestaurantController) GetRestaurants(ctx echo.Context) error {
 	if err := ctx.Bind(&cr); err != nil {
 		return ctx.JSON(http.StatusBadRequest, err.Error())
 	}
-	fmt.Println(cr)
 
 	restaurants, err := rc.Usecase.GetRestaurantsNearStation(cr)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, err.Error())
 	}
 
+	crJSON, err := json.Marshal(cr)
+    if err != nil {
+        return ctx.JSON(http.StatusInternalServerError, err.Error())
+    }
 	restaurantsJSON, err := json.Marshal(restaurants)
     if err != nil {
         return ctx.JSON(http.StatusInternalServerError, err.Error())
     }
 
 	roomId := ctx.QueryParam("room_id")
-    rc.hub.BroadcastToRoom("restaurants", roomId, restaurantsJSON)
+    rc.hub.BroadcastToRoom("restaurants", roomId, restaurantsJSON, crJSON)
 
 	return ctx.JSON(http.StatusOK, restaurants)
 }

@@ -57,23 +57,30 @@ func (h *Hub) RunLoop() {
 	}
 }
 
-func (h *Hub) BroadcastToRoom(apitype string, roomId string, content []byte) {
+func (h *Hub) BroadcastToRoom(apitype string, roomId string, content1 []byte, content2 []byte) {
 	var message *Message
 
 	switch apitype {
 	case "restaurants":
 		var stations interface{}
-		err := json.Unmarshal(content, &stations)
-		if err != nil {
+        var requests interface{}
+		if err := json.Unmarshal(content1, &stations); err != nil {
 			log.Printf("error unmarshaling stations: %v", err)
+			return
+		}
+        
+		if err := json.Unmarshal(content2, &requests); err != nil {
+			log.Printf("error unmarshaling requests: %v", err)
 			return
 		}
 		messageContent := struct {
 			Type     string      `json:"type"`
 			Stations interface{} `json:"stations"`
+            Requests interface{} `json:"requests"`
 		}{
 			Type:     apitype,
 			Stations: stations,
+            Requests: requests,
 		}
 		jsonData, err := json.Marshal(messageContent)
 		if err != nil {
@@ -84,7 +91,7 @@ func (h *Hub) BroadcastToRoom(apitype string, roomId string, content []byte) {
 
 	case "routes":
 		var routes interface{}
-		err := json.Unmarshal(content, &routes)
+		err := json.Unmarshal(content1, &routes)
 		if err != nil {
 			log.Printf("error unmarshaling stations: %v", err)
 			return
