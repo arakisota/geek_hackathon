@@ -87,6 +87,7 @@ export const Map: React.FC<MapProps> = (props) => {
 
         case 'restaurants':
           setRestaurantData(data.stations)
+          setMessages((prev) => [...prev, event.data])
           setIsFormVisible(true)
           handleFormSubmit()
           break
@@ -282,6 +283,17 @@ export const Map: React.FC<MapProps> = (props) => {
                         className="text-center text-white text-sm"
                       >
                         {data.message}
+                      </div>
+                    )
+                  } else if (data.type === 'restaurants') {
+                    return (
+                      <div
+                        key={index}
+                        className="text-center text-white text-sm"
+                      >
+                        {data.requests.arrival_time}
+                        {data.requests.people_num}
+                        {data.requests.purpose}
                       </div>
                     )
                   } else {
