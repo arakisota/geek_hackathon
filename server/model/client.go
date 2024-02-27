@@ -104,33 +104,54 @@ func (c *Client) ReadLoop(broadCast chan<- *Message, unregister chan<- *Client) 
 }
 
 func (c *Client) WriteLoop() {
-	defer func() {
-		c.WS.Close()
-	}()
-	for {
-		message := <-c.SendCh
-		w, err := c.WS.NextWriter(websocket.TextMessage)
-		if err != nil {
-			return
-		}
-		w.Write(message.Content)
+    if c.WS == nil {
+        log.Printf("WebSocket connection is nil")
+        return
+    }
+    defer func() {
+        if err := c.WS.Close(); err != nil {
+            log.Printf("Failed to close WebSocket: %v", err)
+        }
+    }()
+    for {
+        message, ok := <-c.SendCh
+        if !ok {
+            log.Printf("Send channel closed")
+            return
+        }
 
-		n := len(c.SendCh)
-		for i := 0; i < n; i++ {
-			message, ok := <-c.SendCh
-			if !ok {
-				break
-			}
-			if _, err := w.Write(message.Content); err != nil {
-				log.Printf("error writing message: %v", err)
-				return
-			}
-		}
-		if err := w.Close(); err != nil {
-			return
-		}
-	}
+        w, err := c.WS.NextWriter(websocket.TextMessage)
+        if err != nil {
+            log.Printf("Failed to get next writer: %v", err)
+            return
+        }
+
+        if _, err := w.Write(message.Content); err != nil {
+            log.Printf("Failed to write message: %v", err)
+            w.Close()
+            return
+        }
+
+        n := len(c.SendCh)
+        for i := 0; i < n; i++ {
+            message, ok := <-c.SendCh
+            if !ok {
+                log.Printf("Send channel closed during buffered messages processing")
+                break
+            }
+            if _, err := w.Write(message.Content); err != nil {
+                log.Printf("Failed to write buffered message: %v", err)
+                break
+            }
+        }
+
+        if err := w.Close(); err != nil {
+            log.Printf("Failed to close writer: %v", err)
+            return
+        }
+    }
 }
+
 
 func (c *Client) disconnect(unregister chan<- *Client) {
 	unregister <- c
