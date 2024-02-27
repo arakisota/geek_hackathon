@@ -13,7 +13,8 @@ import { Form } from './Form'
 import { Plan } from './Plan'
 import { useMutateAuth, MutateAuthProps } from '../hooks/useMutateAuth'
 import { FaWpforms } from 'react-icons/fa'
-import { IoChatboxEllipsesOutline } from 'react-icons/io5'
+import { FaAnglesLeft, FaAnglesRight } from 'react-icons/fa6'
+import { MdOutlineChat, MdOutlineMarkUnreadChatAlt } from 'react-icons/md'
 import { TbLogout, TbSend } from 'react-icons/tb'
 import togather from '../assets/toGather.png'
 
@@ -51,6 +52,8 @@ export const Map: React.FC<MapProps> = (props) => {
   const [messages, setMessages] = useState<string[]>([])
   const [input, setInput] = useState('')
   const [isChatVisible, setIsChatVisible] = useState<boolean>(false)
+  const [chatPositionLeft, setChatPositionLeft] = useState<boolean>(true)
+  const [hasNewMessage, setHasNewMessage] = useState(false)
   useEffect(() => {
     const websocket = new WebSocket(
       `ws://localhost:8080/ws?token=${token}&room_id=${roomId}`
@@ -84,6 +87,7 @@ export const Map: React.FC<MapProps> = (props) => {
 
         case 'restaurants':
           setRestaurantData(data.stations)
+          setIsFormVisible(true)
           handleFormSubmit()
           break
 
@@ -116,6 +120,14 @@ export const Map: React.FC<MapProps> = (props) => {
       setInput('')
     }
   }
+  const messagesEndRef = useRef<HTMLDivElement | null>(null)
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+  useEffect(() => {
+    scrollToBottom()
+    if (!isChatVisible) setHasNewMessage(true)
+  }, [messages])
 
   // -------------------------- Form --------------------------
   // フォーム上の操作、表示
@@ -204,9 +216,16 @@ export const Map: React.FC<MapProps> = (props) => {
           className={`w-16 h-16 flex items-center justify-center text-white ${
             isChatVisible ? 'bg-black bg-opacity-50' : ''
           }`}
-          onClick={() => setIsChatVisible(!isChatVisible)}
+          onClick={() => {
+            if (!isChatVisible) setHasNewMessage(false)
+            setIsChatVisible(!isChatVisible)
+          }}
         >
-          <IoChatboxEllipsesOutline size={24} />
+          {hasNewMessage ? (
+            <MdOutlineMarkUnreadChatAlt size={24} color={'rgb(255, 0, 255)'} />
+          ) : (
+            <MdOutlineChat size={24} />
+          )}
         </button>
         <div className="self-end">
           <button
@@ -219,13 +238,40 @@ export const Map: React.FC<MapProps> = (props) => {
       </div>
 
       <div style={{ display: isChatVisible ? 'block' : 'none' }}>
-        <div className="fixed inset-0 bg-black bg-opacity-50 max-w-lg flex justify-center pl-20 pr-4 py-4 z-20 overflow-hidden">
+        <div
+          className={`fixed top-0 bottom-0 bg-black bg-opacity-50 w-full max-w-lg flex justify-center p-4 z-20 overflow-hidden ${
+            chatPositionLeft ? 'ml-16 left-0' : 'right-0'
+          }`}
+        >
           <div className="w-full flex flex-col">
+            <div className="w-full flex justify-between items-center">
+              <FaAnglesLeft
+                onClick={() => setChatPositionLeft(true)}
+                className={`${
+                  chatPositionLeft
+                    ? 'text-gray-400 cursor-not-allowed'
+                    : 'text-white cursor-pointer'
+                }`}
+              />
+              <div className="text-white text-sm">
+                ホストのUserId / RoomId : {roomId}
+              </div>
+              <FaAnglesRight
+                onClick={() => setChatPositionLeft(false)}
+                className={`${
+                  !chatPositionLeft
+                    ? 'text-gray-400 cursor-not-allowed'
+                    : 'text-white cursor-pointer'
+                }`}
+              />
+            </div>
+            <hr className="my-4 border-gray-300" />
             <div className="p-4 flex-1 overflow-auto">
               <div className="space-y-2 w-full">
                 {messages.map((message, index) => {
                   const data = JSON.parse(message)
-                  let baseStyle = 'px-4 py-2 rounded-t-2xl break-words w-fit'
+                  let baseStyle =
+                    'px-4 py-2 rounded-t-2xl break-words w-fit overflow-wrap: break-word'
                   let justifyContent =
                     data.userId === userId ? 'justify-end' : 'justify-start'
 
@@ -241,20 +287,28 @@ export const Map: React.FC<MapProps> = (props) => {
                   } else {
                     return (
                       <div key={index} className={`flex ${justifyContent}`}>
-                        <div
-                          className={`${baseStyle} ${
-                            data.userId === userId
-                              ? 'bg-green-300 rounded-bl-2xl'
-                              : 'bg-gray-300 rounded-br-2xl'
-                          }`}
-                        >
-                          {data.message}
+                        <div>
+                          <div
+                            className={`${baseStyle} ${
+                              data.userId === userId
+                                ? 'bg-green-300 rounded-bl-2xl'
+                                : 'bg-gray-300 rounded-br-2xl'
+                            }`}
+                          >
+                            {data.message}
+                          </div>
+                          {data.userId !== userId && (
+                            <div className="text-sm mr-2 text-white">
+                              {data.userId}
+                            </div>
+                          )}
                         </div>
                       </div>
                     )
                   }
                 })}
               </div>
+              <div ref={messagesEndRef} />
             </div>
             <hr className="my-4 border-gray-300" />
             <div className="px-4 pb-4">
