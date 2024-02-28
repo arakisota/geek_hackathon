@@ -1,16 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { GoogleMap, Marker, Polyline } from '@react-google-maps/api'
-import {
-  LatLng,
-  RestaurantsRequest,
-  RestaurantsResponse,
-  RoutesRequest,
-  RoutesResponse,
-  Stations,
-} from '../types'
+import { LatLng, RestaurantsResponse, RoutesResponse, Stations } from '../types'
 import { mapStyle } from '../types/mapStyle'
 import { Form } from './Form'
 import { Plan } from './Plan'
+import { useQueryStations, QueryStationsProps } from '../hooks/useQueryStations'
 import { useMutateAuth, MutateAuthProps } from '../hooks/useMutateAuth'
 import { FaWpforms } from 'react-icons/fa'
 import { FaAnglesLeft, FaAnglesRight } from 'react-icons/fa6'
@@ -85,11 +79,29 @@ export const Map: React.FC<MapProps> = (props) => {
           setMessages((prev) => [...prev, event.data])
           break
 
+        case 'stations':
+          setMessages((prev) => [...prev, event.data])
+          break
+
         case 'restaurants':
           setRestaurantData(data.stations)
-          setMessages((prev) => [...prev, event.data])
           setIsFormVisible(true)
           handleFormSubmit()
+          setMessages((prev: string[]) => {
+            const prevData = JSON.parse(prev[prev.length - 1])
+            if (prevData.type === 'stations') {
+              const dataForm = {
+                type: data.type,
+                requests: data.requests,
+                departures: prevData.stations.departures,
+              }
+              return [
+                ...prev.slice(0, prev.length - 1),
+                JSON.stringify(dataForm),
+              ]
+            }
+            return [...prev]
+          })
           break
 
         case 'routes':
@@ -193,11 +205,21 @@ export const Map: React.FC<MapProps> = (props) => {
     strokeWeight: 10,
   }
 
-  // -------------------------- Requests --------------------------
-  // '/restaurants'と'/routes'エンドポイントでPOSTするリクエストの情報
-  const [restaurantsRequest, setRestaurantsRequest] =
-    useState<RestaurantsRequest>()
-  const [routesRequest, setRoutesRequest] = useState<RoutesRequest>()
+  // -------------------------- Queries --------------------------
+  const { queryStations, getStationName, queryRestaurants, queryRoutes } =
+    useQueryStations({
+      roomId,
+    } as QueryStationsProps)
+
+  // -------------------------- Convert --------------------------
+  const convertPurpose = (purpose: string) => {
+    if (purpose === 'meal') return '食事'
+    if (purpose === 'drinking') return '飲み会'
+    if (purpose === 'date') return 'デート'
+    if (purpose === 'family') return '家族'
+    if (purpose === 'cafe') return 'カフェ'
+    return ''
+  }
 
   return (
     <>
@@ -291,12 +313,33 @@ export const Map: React.FC<MapProps> = (props) => {
                         key={index}
                         className="text-center text-white text-sm"
                       >
-                        {data.requests.arrival_time}
-                        {data.requests.people_num}
-                        {data.requests.purpose}
+                        <div>
+                          --- ホストが以下の内容でフォームを送信しました ---
+                        </div>
+                        <div>
+                          日時 :{' '}
+                          {data.requests.arrival_time
+                            .replaceAll('-', '/')
+                            .replace('T', ' ')
+                            .replace('Z', '')
+                            .replace(':00', '')}
+                        </div>
+                        <div>人数 : {data.requests.people_num}人</div>
+                        <div>
+                          目的 : {convertPurpose(data.requests.purpose)}
+                        </div>
+                        <div className="flex justify-center overflow-wrap: break-word">
+                          出発駅 :{' '}
+                          {data.departures
+                            .map((station: string) => station.replace('駅', ''))
+                            .join(', ')}
+                        </div>
+                        <div>
+                          -----------------------------------------------------
+                        </div>
                       </div>
                     )
-                  } else {
+                  } else if (data.type === 'message') {
                     return (
                       <div key={index} className={`flex ${justifyContent}`}>
                         <div>
@@ -349,9 +392,9 @@ export const Map: React.FC<MapProps> = (props) => {
             <div className="absolute top-0 left-0 z-10 p-4 ml-16 mt-4 max-w-xl bg-white rounded shadow-lg">
               <Form
                 onStationSelect={handleStationSelect}
-                setRestaurantsRequest={setRestaurantsRequest}
-                setRoutesRequest={setRoutesRequest}
                 onSubmit={handleFormSubmit}
+                queryStations={queryStations}
+                getStationName={getStationName}
               />
             </div>
           ) : (
@@ -360,9 +403,9 @@ export const Map: React.FC<MapProps> = (props) => {
                 roomId={roomId}
                 onStationSelect={handleStationSelect}
                 onStationSelectRoutes={handleStationRoutesSelect}
-                restaurantsRequest={restaurantsRequest}
+                queryRestaurants={queryRestaurants}
+                queryRoutes={queryRoutes}
                 restaurantData={restaurantData}
-                routesRequest={routesRequest}
                 routesData={routesData}
                 destStations={destStations}
                 onBack={handleBackToForm}
