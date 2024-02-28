@@ -67,7 +67,7 @@ export const Map: React.FC<MapProps> = (props) => {
           break
 
         case 'logout':
-          if (data.userId == roomId) {
+          if (data.userId === roomId) {
             alert('ホストとの通信が切断されました')
             logout()
             break
@@ -122,6 +122,7 @@ export const Map: React.FC<MapProps> = (props) => {
       websocket.onmessage = null
       //   websocket.close();
     }
+    // eslint-disable-next-line
   }, [])
   const sendMessage = () => {
     if (ws && input.trim()) {
@@ -140,6 +141,7 @@ export const Map: React.FC<MapProps> = (props) => {
   useEffect(() => {
     scrollToBottom()
     if (!isChatVisible) setHasNewMessage(true)
+    // eslint-disable-next-line
   }, [messages])
 
   // -------------------------- Form --------------------------
@@ -225,7 +227,7 @@ export const Map: React.FC<MapProps> = (props) => {
     <>
       <div className="fixed inset-0 bg-gray-600 w-16 z-30">
         <div className="w-16 h-16 flex items-center justify-center">
-          <img src={togather} className="w-12 h-10" />
+          <img src={togather} alt="togather" className="w-12 h-10" />
         </div>
         <button
           className={`w-16 h-16 flex items-center justify-center ${
@@ -291,77 +293,82 @@ export const Map: React.FC<MapProps> = (props) => {
             <hr className="my-4 border-gray-300" />
             <div className="p-4 flex-1 overflow-auto">
               <div className="space-y-2 w-full">
-                {messages.map((message, index) => {
-                  const data = JSON.parse(message)
-                  let baseStyle =
-                    'px-4 py-2 rounded-t-2xl break-words w-fit overflow-wrap: break-word'
-                  let justifyContent =
-                    data.userId === userId ? 'justify-end' : 'justify-start'
+                {
+                  // eslint-disable-next-line
+                  messages.map((message, index) => {
+                    const data = JSON.parse(message)
+                    let baseStyle =
+                      'px-4 py-2 rounded-t-2xl break-words w-fit overflow-wrap: break-word'
+                    let justifyContent =
+                      data.userId === userId ? 'justify-end' : 'justify-start'
 
-                  if (data.type === 'login' || data.type === 'logout') {
-                    return (
-                      <div
-                        key={index}
-                        className="text-center text-white text-sm"
-                      >
-                        {data.message}
-                      </div>
-                    )
-                  } else if (data.type === 'restaurants') {
-                    return (
-                      <div
-                        key={index}
-                        className="text-center text-white text-sm"
-                      >
-                        <div>
-                          --- ホストが以下の内容でフォームを送信しました ---
+                    if (data.type === 'login' || data.type === 'logout') {
+                      return (
+                        <div
+                          key={index}
+                          className="text-center text-white text-sm"
+                        >
+                          {data.message}
                         </div>
-                        <div>人数 : {data.requests.people_num}人</div>
-                        <div>
-                          日時 :{' '}
-                          {data.requests.arrival_time
-                            .replaceAll('-', '/')
-                            .replace('T', ' ')
-                            .replace('Z', '')
-                            .replace(':00', '')}
-                        </div>
-                        <div>
-                          目的 : {convertPurpose(data.requests.purpose)}
-                        </div>
-                        <div className="flex justify-center overflow-wrap: break-word">
-                          出発駅 :{' '}
-                          {data.departures
-                            .map((station: string) => station.replace('駅', ''))
-                            .join(', ')}
-                        </div>
-                        <div>
-                          -----------------------------------------------------
-                        </div>
-                      </div>
-                    )
-                  } else if (data.type === 'message') {
-                    return (
-                      <div key={index} className={`flex ${justifyContent}`}>
-                        <div>
-                          <div
-                            className={`${baseStyle} ${
-                              data.userId === userId
-                                ? 'bg-green-300 rounded-bl-2xl'
-                                : 'bg-gray-300 rounded-br-2xl'
-                            }`}
-                          >
-                            {data.message}
+                      )
+                    } else if (data.type === 'restaurants') {
+                      return (
+                        <div
+                          key={index}
+                          className="text-center text-white text-sm"
+                        >
+                          <div>
+                            --- ホストが以下の内容でフォームを送信しました ---
                           </div>
-                          {data.userId !== userId && (
-                            <div className="text-sm mr-2 text-white">
-                              {data.userId}
-                            </div>
-                          )}
+                          <div>人数 : {data.requests.people_num}人</div>
+                          <div>
+                            日時 :{' '}
+                            {data.requests.arrival_time
+                              .replaceAll('-', '/')
+                              .replace('T', ' ')
+                              .replace('Z', '')
+                              .replace(':00', '')}
+                          </div>
+                          <div>
+                            目的 : {convertPurpose(data.requests.purpose)}
+                          </div>
+                          <div className="flex justify-center overflow-wrap: break-word">
+                            出発駅 :{' '}
+                            {data.departures
+                              .map((station: string) =>
+                                station.replace('駅', '')
+                              )
+                              .join(', ')}
+                          </div>
+                          <div>
+                            -----------------------------------------------------
+                          </div>
                         </div>
-                      </div>
-                    )
-                  }
-                })}
+                      )
+                    } else if (data.type === 'message') {
+                      return (
+                        <div key={index} className={`flex ${justifyContent}`}>
+                          <div>
+                            <div
+                              className={`${baseStyle} ${
+                                data.userId === userId
+                                  ? 'bg-green-300 rounded-bl-2xl'
+                                  : 'bg-gray-300 rounded-br-2xl'
+                              }`}
+                            >
+                              {data.message}
+                            </div>
+                            {data.userId !== userId && (
+                              <div className="text-sm mr-2 text-white">
+                                {data.userId}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    }
+                  })
+                }
               </div>
               <div ref={messagesEndRef} />
             </div>

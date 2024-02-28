@@ -74,6 +74,7 @@ export const Plan: React.FC<PlanProps> = (props) => {
   // -------------------------- Restaurants --------------------------
   // '/staions'エンドポイントのレスポンスに応じて駅周辺のお店情報を取得
   const {
+    // eslint-disable-next-line
     data: _restaurantData,
     isLoading: restaurantIsLoading,
     error: restaurantError,
@@ -82,6 +83,7 @@ export const Plan: React.FC<PlanProps> = (props) => {
   // -------------------------- Routes --------------------------
   // '/staions'エンドポイントのレスポンスに応じて各出発駅から目的地までの経路情報を取得
   const {
+    // eslint-disable-next-line
     data: _routesData,
     isLoading: routesIsLoading,
     error: routesError,
