@@ -18,6 +18,8 @@ type FormData = {
 }
 
 type FormProps = {
+  userId: string
+  roomId: string
   onStationSelect: (positions: LatLng[]) => void
   onSubmit: () => void
   queryStations: UseMutationResult<StationsResponse, Error, StationsRequest>
@@ -25,7 +27,14 @@ type FormProps = {
 }
 
 export const Form: React.FC<FormProps> = (props) => {
-  const { onStationSelect, onSubmit, queryStations, getStationName } = props
+  const {
+    userId,
+    roomId,
+    onStationSelect,
+    onSubmit,
+    queryStations,
+    getStationName,
+  } = props
 
   // eslint-disable-next-line
   const { data, isLoading, error, mutate } = queryStations
@@ -167,6 +176,9 @@ export const Form: React.FC<FormProps> = (props) => {
     )
   }
 
+  console.log(userId, roomId)
+  console.log(isValid, userId === roomId)
+
   return (
     <div className="flex items-center flex-col text-gray-600 font-mono">
       {/* <h2 className="my-6">入力フォーム</h2> */}
@@ -272,12 +284,12 @@ export const Form: React.FC<FormProps> = (props) => {
           </button>
           <button
             type="submit"
-            disabled={!isValid}
+            disabled={!isValid || roomId !== userId}
             className={`py-2 px-4 rounded text-white ${
-              isValid ? 'bg-indigo-600' : 'bg-gray-400'
+              isValid && roomId === userId ? 'bg-indigo-600' : 'bg-gray-400'
             }`}
           >
-            目的地を探す
+            集合地を探す
           </button>
           <button
             type="button"

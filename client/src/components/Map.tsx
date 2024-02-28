@@ -316,6 +316,7 @@ export const Map: React.FC<MapProps> = (props) => {
                         <div>
                           --- ホストが以下の内容でフォームを送信しました ---
                         </div>
+                        <div>人数 : {data.requests.people_num}人</div>
                         <div>
                           日時 :{' '}
                           {data.requests.arrival_time
@@ -324,7 +325,6 @@ export const Map: React.FC<MapProps> = (props) => {
                             .replace('Z', '')
                             .replace(':00', '')}
                         </div>
-                        <div>人数 : {data.requests.people_num}人</div>
                         <div>
                           目的 : {convertPurpose(data.requests.purpose)}
                         </div>
@@ -391,6 +391,8 @@ export const Map: React.FC<MapProps> = (props) => {
           {showForm ? (
             <div className="absolute top-0 left-0 z-10 p-4 ml-16 mt-4 max-w-xl bg-white rounded shadow-lg">
               <Form
+                userId={userId}
+                roomId={roomId}
                 onStationSelect={handleStationSelect}
                 onSubmit={handleFormSubmit}
                 queryStations={queryStations}
@@ -400,6 +402,7 @@ export const Map: React.FC<MapProps> = (props) => {
           ) : (
             <div className="absolute top-0 left-0 z-10 p-4 ml-16 mt-4 max-w-xl bg-white rounded shadow-lg max-h-[95%] overflow-y-auto">
               <Plan
+                userId={userId}
                 roomId={roomId}
                 onStationSelect={handleStationSelect}
                 onStationSelectRoutes={handleStationRoutesSelect}

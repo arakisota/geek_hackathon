@@ -8,13 +8,9 @@ import {
   Stations,
 } from '../types'
 import { UseMutationResult } from '@tanstack/react-query'
-import {
-  QueryRestaurantsProps,
-  useQueryRestaurants,
-} from '../hooks/useQueryRestaurant'
-import { QueryRoutesProps, useQueryRoutes } from '../hooks/useQueryRoutes'
 
 type PlanProps = {
+  userId: string
   roomId: string
   onStationSelect: (positions: LatLng[]) => void
   onStationSelectRoutes: (positions: (Stations[] | undefined)[]) => void
@@ -61,6 +57,7 @@ interface OpeningHoursProps {
 
 export const Plan: React.FC<PlanProps> = (props) => {
   const {
+    userId,
     roomId,
     onStationSelect,
     onStationSelectRoutes,
@@ -215,7 +212,7 @@ export const Plan: React.FC<PlanProps> = (props) => {
             onStationSelectRoutes([])
           }}
         >
-          再入力する
+          {roomId === userId ? '再入力する' : 'フォームに戻る'}
         </button>
       </>
     )
@@ -246,7 +243,7 @@ export const Plan: React.FC<PlanProps> = (props) => {
             </button>
           ))}
         <button className={'px-4 py-2 bg-gray-200'} onClick={handleReset}>
-          再入力する
+          {roomId === userId ? '再入力する' : 'フォームに戻る'}
         </button>
       </div>
       <div className="flex space-x-2 border-b">
