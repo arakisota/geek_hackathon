@@ -7,6 +7,7 @@ import {
   RoutesResponse,
   Stations,
 } from '../types'
+import { UseMutationResult } from '@tanstack/react-query'
 import {
   QueryRestaurantsProps,
   useQueryRestaurants,
@@ -17,9 +18,14 @@ type PlanProps = {
   roomId: string
   onStationSelect: (positions: LatLng[]) => void
   onStationSelectRoutes: (positions: (Stations[] | undefined)[]) => void
-  restaurantsRequest: RestaurantsRequest | undefined
+  queryRestaurants: UseMutationResult<
+    RestaurantsResponse,
+    Error,
+    RestaurantsRequest,
+    unknown
+  >
+  queryRoutes: UseMutationResult<RoutesResponse, Error, RoutesRequest, unknown>
   restaurantData: RestaurantsResponse | undefined
-  routesRequest: RoutesRequest | undefined
   routesData: RoutesResponse | undefined
   destStations: string[]
   onBack: () => void
@@ -58,9 +64,9 @@ export const Plan: React.FC<PlanProps> = (props) => {
     roomId,
     onStationSelect,
     onStationSelectRoutes,
-    restaurantsRequest,
+    queryRestaurants,
+    queryRoutes,
     restaurantData,
-    routesRequest,
     routesData,
     destStations,
     onBack,
@@ -70,37 +76,19 @@ export const Plan: React.FC<PlanProps> = (props) => {
 
   // -------------------------- Restaurants --------------------------
   // '/staions'エンドポイントのレスポンスに応じて駅周辺のお店情報を取得
-  const { queryRestaurants } = useQueryRestaurants({
-    roomId,
-  } as QueryRestaurantsProps)
   const {
     data: _restaurantData,
     isLoading: restaurantIsLoading,
     error: restaurantError,
   } = queryRestaurants
-  useEffect(() => {
-    if (restaurantsRequest?.stations !== undefined) {
-      queryRestaurants.mutate(restaurantsRequest)
-    }
-    // eslint-disable-next-line
-  }, [restaurantsRequest?.stations])
 
   // -------------------------- Routes --------------------------
   // '/staions'エンドポイントのレスポンスに応じて各出発駅から目的地までの経路情報を取得
-  const { queryRoutes } = useQueryRoutes({
-    roomId,
-  } as QueryRoutesProps)
   const {
     data: _routesData,
     isLoading: routesIsLoading,
     error: routesError,
   } = queryRoutes
-  useEffect(() => {
-    if (routesRequest?.destination_stations !== undefined) {
-      queryRoutes.mutate(routesRequest)
-    }
-    // eslint-disable-next-line
-  }, [routesRequest?.destination_stations])
 
   // -------------------------- Station --------------------------
   // プラン上で現在選択している駅、地図上でレストランのマーカー表示、経路表示で利用

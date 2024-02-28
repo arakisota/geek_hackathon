@@ -1,14 +1,14 @@
 import { useState } from 'react'
 import { useForm, useFieldArray, SubmitHandler } from 'react-hook-form'
-import { useQueryStations } from '../hooks/useQueryStations'
+import { UseMutationResult } from '@tanstack/react-query'
 import { debounce } from 'lodash'
 import {
   StationRead,
   LatLng,
-  RestaurantsRequest,
-  RoutesRequest,
+  StationsResponse,
+  StationsRequest,
+  SuggestionResponse,
 } from '../types'
-import { QueryStationsProps } from '../hooks/useQueryStations'
 
 type FormData = {
   stations: { station: string }[]
@@ -19,19 +19,13 @@ type FormData = {
 
 type FormProps = {
   onStationSelect: (positions: LatLng[]) => void
-  setRestaurantsRequest: (restaurantsRequest: RestaurantsRequest) => void
-  setRoutesRequest: (routesRequest: RoutesRequest) => void
   onSubmit: () => void
+  queryStations: UseMutationResult<StationsResponse, Error, StationsRequest>
+  getStationName: (input: string) => Promise<SuggestionResponse>
 }
 
 export const Form: React.FC<FormProps> = (props) => {
-  const { onStationSelect, setRestaurantsRequest, setRoutesRequest, onSubmit } =
-    props
-
-  const { queryStations, getStationName } = useQueryStations({
-    setRestaurantsRequest,
-    setRoutesRequest,
-  } as QueryStationsProps)
+  const { onStationSelect, onSubmit, queryStations, getStationName } = props
 
   // eslint-disable-next-line
   const { data, isLoading, error, mutate } = queryStations
