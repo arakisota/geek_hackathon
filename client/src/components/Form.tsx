@@ -146,8 +146,6 @@ export const Form: React.FC<FormProps> = (props) => {
     onStationSelect(newPositions)
   }
 
-  // console.log()
-
   const peopleOptions = []
   for (let i = 1; i <= 50; i++) {
     peopleOptions.push(
@@ -175,9 +173,6 @@ export const Form: React.FC<FormProps> = (props) => {
       </div>
     )
   }
-
-  console.log(userId, roomId)
-  console.log(isValid, userId === roomId)
 
   return (
     <div className="flex items-center flex-col text-gray-600 font-mono">
