@@ -68,7 +68,7 @@ export const Map: React.FC<MapProps> = (props) => {
 
         case 'logout':
           if (data.userId == roomId) {
-            alert('Host logout!')
+            alert('ホストとの通信が切断されました')
             logout()
             break
           }
@@ -277,7 +277,7 @@ export const Map: React.FC<MapProps> = (props) => {
                 }`}
               />
               <div className="text-white text-sm">
-                ホストのUserId / RoomId : {roomId}
+                ホストのUserID / RoomID : {roomId}
               </div>
               <FaAnglesRight
                 onClick={() => setChatPositionLeft(false)}

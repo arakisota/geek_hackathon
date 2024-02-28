@@ -55,7 +55,7 @@ func (c *Client) ReadLoop(broadCast chan<- *Message, unregister chan<- *Client) 
 			}{
 				Type:    receivedMessage.Type,
 				UserId:  c.UserId,
-				Message: fmt.Sprintf("User %s has logged in to room %s", c.UserId, c.RoomId),
+				Message: fmt.Sprintf("%sが参加しました", c.UserId),
 			}
 			jsonData, err := json.Marshal(loginMessage)
 			if err != nil {
@@ -72,7 +72,7 @@ func (c *Client) ReadLoop(broadCast chan<- *Message, unregister chan<- *Client) 
 			}{
 				Type:    receivedMessage.Type,
 				UserId:  c.UserId,
-				Message: fmt.Sprintf("User %s has logged out from room %s", c.UserId, c.RoomId),
+				Message: fmt.Sprintf("%sがチャットルームから退出しました", c.UserId),
 			}
 			jsonData, err := json.Marshal(logoutMessage)
 			if err != nil {
