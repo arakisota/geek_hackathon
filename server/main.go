@@ -26,7 +26,7 @@ func main() {
 	restaurantUsecase := usecase.NewRestaurantUsecase(restaurantRepository)
 	routeUsecase := usecase.NewRouteUsecase(routeRepository)
 	userController := controller.NewUserController(userUsecase)
-	stationController := controller.NewStationController(stationUsecase)
+	stationController := controller.NewStationController(stationUsecase, hub)
 	restaurantController := controller.NewRestaurantController(restaurantUsecase, hub)
 	routeController := controller.NewRouteController(routeUsecase, hub)
 

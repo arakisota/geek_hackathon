@@ -61,6 +61,26 @@ func (h *Hub) BroadcastToRoom(apitype string, roomId string, content1 []byte, co
 	var message *Message
 
 	switch apitype {
+    case "stations":
+        var stations interface{}
+		if err := json.Unmarshal(content1, &stations); err != nil {
+			log.Printf("error unmarshaling stations: %v", err)
+			return
+		}
+		messageContent := struct {
+			Type     string      `json:"type"`
+			Stations interface{} `json:"stations"`
+		}{
+			Type:     apitype,
+			Stations: stations,
+		}
+		jsonData, err := json.Marshal(messageContent)
+		if err != nil {
+			log.Printf("error marshaling message: %v", err)
+			return
+		}
+		message = &Message{RoomId: roomId, Content: jsonData}
+        
 	case "restaurants":
 		var stations interface{}
         var requests interface{}
