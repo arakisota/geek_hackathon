@@ -2,15 +2,12 @@ import React, { useState, useEffect, useRef } from 'react'
 import { GoogleMap, Marker, Polyline } from '@react-google-maps/api'
 import { LatLng, RestaurantsResponse, RoutesResponse, Stations } from '../types'
 import { mapStyle } from '../types/mapStyle'
+import { Appbar } from './Appbar'
+import { Chat } from './Chat'
 import { Form } from './Form'
 import { Plan } from './Plan'
 import { useQueryStations, QueryStationsProps } from '../hooks/useQueryStations'
 import { useMutateAuth, MutateAuthProps } from '../hooks/useMutateAuth'
-import { FaWpforms } from 'react-icons/fa'
-import { FaAnglesLeft, FaAnglesRight } from 'react-icons/fa6'
-import { MdOutlineChat, MdOutlineMarkUnreadChatAlt } from 'react-icons/md'
-import { TbLogout, TbSend } from 'react-icons/tb'
-import togather from '../assets/toGather.png'
 
 type MapProps = {
   userId: string
@@ -44,9 +41,7 @@ export const Map: React.FC<MapProps> = (props) => {
   // 部屋の作成、ログイン、ログアウト、チャット、ホストのレストラン/経路情報の取得
   const token = localStorage.getItem('token')
   const [messages, setMessages] = useState<string[]>([])
-  const [input, setInput] = useState('')
   const [isChatVisible, setIsChatVisible] = useState<boolean>(false)
-  const [chatPositionLeft, setChatPositionLeft] = useState<boolean>(true)
   const [hasNewMessage, setHasNewMessage] = useState(false)
   useEffect(() => {
     const websocket = new WebSocket(
@@ -124,25 +119,6 @@ export const Map: React.FC<MapProps> = (props) => {
     }
     // eslint-disable-next-line
   }, [])
-  const sendMessage = () => {
-    if (ws && input.trim()) {
-      const chatMessage = JSON.stringify({
-        type: 'message',
-        content: input,
-      })
-      ws.send(chatMessage)
-      setInput('')
-    }
-  }
-  const messagesEndRef = useRef<HTMLDivElement | null>(null)
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
-  useEffect(() => {
-    scrollToBottom()
-    if (!isChatVisible) setHasNewMessage(true)
-    // eslint-disable-next-line
-  }, [messages])
 
   // -------------------------- Form --------------------------
   // フォーム上の操作、表示
@@ -213,190 +189,34 @@ export const Map: React.FC<MapProps> = (props) => {
       roomId,
     } as QueryStationsProps)
 
-  // -------------------------- Convert --------------------------
-  const convertPurpose = (purpose: string) => {
-    if (purpose === 'meal') return '食事'
-    if (purpose === 'drinking') return '飲み会'
-    if (purpose === 'date') return 'デート'
-    if (purpose === 'family') return '家族'
-    if (purpose === 'cafe') return 'カフェ'
-    return ''
-  }
-
   return (
     <>
-      <div className="fixed inset-0 bg-gray-600 w-16 z-30">
-        <div className="w-16 h-16 flex items-center justify-center">
-          <img src={togather} alt="togather" className="w-12 h-10" />
-        </div>
-        <button
-          className={`w-16 h-16 flex items-center justify-center ${
-            isFormVisible ? 'text-black bg-white' : 'text-white'
-          }`}
-          onClick={() => setIsFormVisible(!isFormVisible)}
-        >
-          <FaWpforms size={24} />
-        </button>
-        <button
-          className={`w-16 h-16 flex items-center justify-center text-white ${
-            isChatVisible ? 'bg-black bg-opacity-50' : ''
-          }`}
-          onClick={() => {
-            if (!isChatVisible) setHasNewMessage(false)
-            setIsChatVisible(!isChatVisible)
-          }}
-        >
-          {hasNewMessage ? (
-            <MdOutlineMarkUnreadChatAlt size={24} color={'rgb(255, 0, 255)'} />
-          ) : (
-            <MdOutlineChat size={24} />
-          )}
-        </button>
-        <div className="self-end">
-          <button
-            className="w-16 h-16 rounded-full flex items-center justify-center text-white"
-            onClick={logout}
-          >
-            <TbLogout size={24} />
-          </button>
-        </div>
-      </div>
+      {/* アプリケーションバー */}
+      <Appbar
+        isFormVisible={isFormVisible}
+        setIsFormVisible={setIsFormVisible}
+        isChatVisible={isChatVisible}
+        setIsChatVisible={setIsChatVisible}
+        hasNewMessage={hasNewMessage}
+        setHasNewMessage={setHasNewMessage}
+        logout={logout}
+      />
 
-      <div style={{ display: isChatVisible ? 'block' : 'none' }}>
-        <div
-          className={`fixed top-0 bottom-0 bg-black bg-opacity-50 w-full max-w-lg flex justify-center p-4 z-20 overflow-hidden ${
-            chatPositionLeft ? 'ml-16 left-0' : 'right-0'
-          }`}
-        >
-          <div className="w-full flex flex-col">
-            <div className="w-full flex justify-between items-center">
-              <FaAnglesLeft
-                onClick={() => setChatPositionLeft(true)}
-                className={`${
-                  chatPositionLeft
-                    ? 'text-gray-400 cursor-not-allowed'
-                    : 'text-white cursor-pointer'
-                }`}
-              />
-              <div className="text-white text-sm">
-                ホストのUserID / RoomID : {roomId}
-              </div>
-              <FaAnglesRight
-                onClick={() => setChatPositionLeft(false)}
-                className={`${
-                  !chatPositionLeft
-                    ? 'text-gray-400 cursor-not-allowed'
-                    : 'text-white cursor-pointer'
-                }`}
-              />
-            </div>
-            <hr className="my-4 border-gray-300" />
-            <div className="p-4 flex-1 overflow-auto">
-              <div className="space-y-2 w-full">
-                {
-                  // eslint-disable-next-line
-                  messages.map((message, index) => {
-                    const data = JSON.parse(message)
-                    let baseStyle =
-                      'px-4 py-2 rounded-t-2xl break-words w-fit overflow-wrap: break-word'
-                    let justifyContent =
-                      data.userId === userId ? 'justify-end' : 'justify-start'
+      {/* チャット */}
+      <Chat
+        userId={userId}
+        roomId={roomId}
+        isChatVisible={isChatVisible}
+        messages={messages}
+        setHasNewMessage={setHasNewMessage}
+        ws={ws}
+      />
 
-                    if (data.type === 'login' || data.type === 'logout') {
-                      return (
-                        <div
-                          key={index}
-                          className="text-center text-white text-sm"
-                        >
-                          {data.message}
-                        </div>
-                      )
-                    } else if (data.type === 'restaurants') {
-                      return (
-                        <div
-                          key={index}
-                          className="text-center text-white text-sm"
-                        >
-                          <div>
-                            --- ホストが以下の内容でフォームを送信しました ---
-                          </div>
-                          <div>人数 : {data.requests.people_num}人</div>
-                          <div>
-                            日時 :{' '}
-                            {data.requests.arrival_time
-                              .replaceAll('-', '/')
-                              .replace('T', ' ')
-                              .replace('Z', '')
-                              .replace(':00', '')}
-                          </div>
-                          <div>
-                            目的 : {convertPurpose(data.requests.purpose)}
-                          </div>
-                          <div className="flex justify-center overflow-wrap: break-word">
-                            出発駅 :{' '}
-                            {data.departures
-                              .map((station: string) =>
-                                station.replace('駅', '')
-                              )
-                              .join(', ')}
-                          </div>
-                          <div>
-                            -----------------------------------------------------
-                          </div>
-                        </div>
-                      )
-                    } else if (data.type === 'message') {
-                      return (
-                        <div key={index} className={`flex ${justifyContent}`}>
-                          <div>
-                            <div
-                              className={`${baseStyle} ${
-                                data.userId === userId
-                                  ? 'bg-green-300 rounded-bl-2xl'
-                                  : 'bg-gray-300 rounded-br-2xl'
-                              }`}
-                            >
-                              {data.message}
-                            </div>
-                            {data.userId !== userId && (
-                              <div className="text-sm mr-2 text-white">
-                                {data.userId}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )
-                    }
-                  })
-                }
-              </div>
-              <div ref={messagesEndRef} />
-            </div>
-            <hr className="my-4 border-gray-300" />
-            <div className="px-4 pb-4">
-              <div className="flex items-center">
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  className="flex-1 border rounded-lg p-2 mr-2"
-                />
-                <button
-                  onClick={sendMessage}
-                  className="bg-blue-500 text-white rounded-lg p-2"
-                >
-                  <TbSend size={26} />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
+      {/* フォーム・お店の表示 */}
       <div className="relative">
         <div style={{ display: isFormVisible ? 'block' : 'none' }}>
           {showForm ? (
-            <div className="absolute top-0 left-0 z-10 p-4 ml-16 mt-4 max-w-xl bg-white rounded shadow-lg">
+            <div className="absolute top-16 md:top-4 left-0 z-10 p-4 md:ml-16 w-full md:max-w-xs bg-white rounded shadow-lg">
               <Form
                 userId={userId}
                 roomId={roomId}
@@ -407,7 +227,7 @@ export const Map: React.FC<MapProps> = (props) => {
               />
             </div>
           ) : (
-            <div className="absolute top-0 left-0 z-10 p-4 ml-16 mt-4 max-w-xl bg-white rounded shadow-lg max-h-[95%] overflow-y-auto">
+            <div className="absolute top-16 md:top-4 left-0 z-10 p-4 md:ml-16 w-full md:max-w-lg bg-white rounded shadow-lg max-h-[40vh] md:max-h-[95vh] overflow-y-auto">
               <Plan
                 userId={userId}
                 roomId={roomId}
@@ -427,6 +247,8 @@ export const Map: React.FC<MapProps> = (props) => {
             </div>
           )}
         </div>
+
+        {/* GoogleMap */}
         <GoogleMap
           mapContainerStyle={containerStyle}
           center={defaultCenter}
