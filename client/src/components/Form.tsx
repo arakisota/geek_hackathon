@@ -9,6 +9,10 @@ import {
   StationsRequest,
   SuggestionResponse,
 } from '../types'
+import { BsFillPeopleFill } from 'react-icons/bs'
+import { BiSolidPurchaseTag } from 'react-icons/bi'
+import { RiMapPinTimeLine } from 'react-icons/ri'
+import { FaTrainSubway } from 'react-icons/fa6'
 
 type FormData = {
   stations: { station: string }[]
@@ -176,59 +180,63 @@ export const Form: React.FC<FormProps> = (props) => {
 
   return (
     <div className="flex items-center flex-col text-gray-600 font-mono">
-      {/* <h2 className="my-6">入力フォーム</h2> */}
       <form
         onSubmit={handleSubmit(submitStationsHandler)}
         className="w-full max-w-md"
       >
-        {/* 人数入力項目 */}
         <div className="flex mb-4 items-center">
-          <label className="w-1/3" htmlFor="people_num">
-            人数:
-          </label>
-          <select
-            {...register('people_num', { required: '人数を選択してください' })}
-            className="flex-1 px-3 py-2 border border-gray-300"
-            id="people_num"
-          >
-            <option value="">人数を選択してください</option>
-            {peopleOptions}
-          </select>
+          {/* 人数入力項目 */}
+          <div className="flex flex-1 relative items-center mr-4">
+            <BsFillPeopleFill
+              className="absolute left-3 text-gray-400"
+              size={20}
+            />
+            <select
+              {...register('people_num', { required: '人数を選択する' })}
+              className="flex-1 px-3 py-2 pl-10 border border-gray-300 appearance-none"
+              id="people_num"
+            >
+              <option value="">人数を選択</option>
+              {peopleOptions}
+            </select>
+          </div>
+
+          {/* 目的選択項目 */}
+          <div className="flex flex-1 relative items-center">
+            <BiSolidPurchaseTag
+              className="absolute left-3 text-gray-400"
+              size={20}
+            />
+            <select
+              {...register('purpose', { required: '目的を選択' })}
+              className="flex-1 px-3 py-2 pl-10 border border-gray-300 appearance-none"
+              id="purpose"
+            >
+              <option value="">目的を選択</option>
+              <option value="meal">食事</option>
+              <option value="drinking">飲み会</option>
+              <option value="date">デート</option>
+              <option value="family">家族</option>
+              <option value="cafe">カフェ</option>
+            </select>
+          </div>
         </div>
 
         {/* 日時選択項目 */}
-        <div className="flex mb-4 items-center">
-          <label className="w-1/5" htmlFor="arrival_time">
-            日時:
-          </label>
+        <div className="flex mb-4 items-center relative">
+          <RiMapPinTimeLine
+            className="absolute left-3 text-gray-400"
+            size={20}
+          />
           <input
             type="datetime-local"
             {...register('arrival_time', {
-              required: '日時を入力してください',
+              required: '日時を入力する',
             })}
-            className="flex-1 px-3 py-2 border border-gray-300"
+            className="flex-1 px-3 py-2 pl-10 border border-gray-300 appearance-none"
             id="arrival_time"
-            placeholder="日時を入力してください"
+            placeholder="日時を入力する"
           />
-        </div>
-
-        {/* 目的選択項目 */}
-        <div className="flex mb-4 items-center">
-          <label className="w-1/3" htmlFor="purpose">
-            目的:
-          </label>
-          <select
-            {...register('purpose', { required: '目的を選択してください' })}
-            className="flex-1 px-3 py-2 border border-gray-300"
-            id="purpose"
-          >
-            <option value="">目的を選択してください</option>
-            <option value="meal">食事</option>
-            <option value="drinking">飲み会</option>
-            <option value="date">デート</option>
-            <option value="family">家族</option>
-            <option value="cafe">カフェ</option>
-          </select>
         </div>
 
         <hr className="my-4 border-gray-300" />
@@ -236,21 +244,25 @@ export const Form: React.FC<FormProps> = (props) => {
         {/* 駅名入力項目 */}
         {fields.map((field, index) => (
           <div className="flex mb-4 items-start" key={field.id}>
-            <label className="w-1/5 pt-2" htmlFor={`station${index}`}>
-              駅名{index + 1}:
-            </label>
             <div className="flex-1 relative">
-              <input
-                className="w-full px-3 py-2 border border-gray-300"
-                placeholder="駅名を入力してください"
-                {...register(`stations.${index}.station`, {
-                  onChange: (e) => handleInputChange(index, e),
-                  required: '駅名を入力してください',
-                })}
-                id={`station${index}`}
-              />
+              <div className="relative w-full flex items-center">
+                <FaTrainSubway
+                  className="absolute left-3 text-gray-400"
+                  size={20}
+                />
+                <input
+                  className="w-full pl-11 px-3 py-2 border border-gray-300"
+                  placeholder={`駅名${index + 1}`}
+                  {...register(`stations.${index}.station`, {
+                    onChange: (e) => handleInputChange(index, e),
+                    required: `駅名${index + 1}`,
+                  })}
+                  id={`station${index}`}
+                />
+              </div>
+
               {suggestions[index] && suggestions[index].length > 0 && (
-                <div className="absolute inset-x-0 md:left-full md:top-0 md:ml-2 z-10 w-full md:w-52 bg-white border border-gray-300 max-h-40 overflow-auto">
+                <div className="absolute inset-x-0 z-10 w-full bg-white border border-gray-300 max-h-40 overflow-auto">
                   {suggestions[index].map((suggestion, sIndex) => (
                     <div
                       key={sIndex}

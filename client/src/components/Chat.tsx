@@ -164,6 +164,7 @@ export const Chat: React.FC<ChatProps> = (props: ChatProps) => {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
+                placeholder="メッセージを作成"
                 className="flex-1 border rounded-lg p-2 mr-2"
               />
               <button

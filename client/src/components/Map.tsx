@@ -167,7 +167,15 @@ export const Map: React.FC<MapProps> = (props) => {
 
       const bounds = new window.google.maps.LatLngBounds()
       stationPositions.forEach((stationPosition) => {
-        bounds.extend(stationPosition)
+        if (
+          stationPosition &&
+          'lat' in stationPosition &&
+          'lng' in stationPosition
+        ) {
+          bounds.extend(stationPosition)
+        } else {
+          bounds.extend(defaultCenter)
+        }
       })
       if (stationPositions.length === 1) {
         mapRef.current.setOptions({ maxZoom: 15 })
@@ -216,7 +224,7 @@ export const Map: React.FC<MapProps> = (props) => {
       <div className="relative">
         <div style={{ display: isFormVisible ? 'block' : 'none' }}>
           {showForm ? (
-            <div className="absolute top-16 md:top-4 left-0 z-10 p-4 md:ml-16 w-full md:max-w-xs bg-white rounded shadow-lg">
+            <div className="absolute top-16 md:top-4 left-0 z-10 p-4 md:ml-16 w-full md:max-w-xs bg-white rounded shadow-lg max-h-[40vh] md:max-h-[95vh] overflow-y-auto md:animate-slide-in-left animate-slide-in-top">
               <Form
                 userId={userId}
                 roomId={roomId}
@@ -227,7 +235,7 @@ export const Map: React.FC<MapProps> = (props) => {
               />
             </div>
           ) : (
-            <div className="absolute top-16 md:top-4 left-0 z-10 p-4 md:ml-16 w-full md:max-w-lg bg-white rounded shadow-lg max-h-[40vh] md:max-h-[95vh] overflow-y-auto">
+            <div className="absolute top-16 md:top-4 left-0 z-10 md:ml-16 w-full md:max-w-lg bg-white rounded shadow-lg max-h-[40vh] md:max-h-[95vh] overflow-y-auto md:animate-slide-in-left animate-slide-in-top">
               <Plan
                 userId={userId}
                 roomId={roomId}
