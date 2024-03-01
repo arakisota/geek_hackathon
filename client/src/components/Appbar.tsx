@@ -29,7 +29,7 @@ export const Appbar: React.FC<AppbarProps> = (props: AppbarProps) => {
       {/* ナビゲーションバー (スマホ) */}
       <div className="bg-gray-600 text-white fixed top-0 left-0 right-0 z-30 h-16 flex items-center justify-between md:hidden">
         {/* md:hidden で中サイズ以上では非表示 */}
-        <img src={togather} className="w-12 h-10 ml-4" />
+        <img src={togather} alt={togather} className="w-12 h-10 ml-4" />
         <div className="flex gap-4 mr-4">
           <button
             className={`p-2 ${isFormVisible ? 'text-black bg-white' : ''}`}
@@ -63,7 +63,7 @@ export const Appbar: React.FC<AppbarProps> = (props: AppbarProps) => {
       <div className="fixed inset-0 w-16 z-30 hidden md:flex flex-col bg-gray-600">
         {/* md:flex で中サイズ以上で表示 */}
         <div className="w-16 h-16 flex items-center justify-center">
-          <img src={togather} className="w-12 h-10" />
+          <img src={togather} alt={togather} className="w-12 h-10" />
         </div>
         {/* フォーム表示ボタン */}
         <button
