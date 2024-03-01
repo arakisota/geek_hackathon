@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x17suggestpb/suggest.proto\x12\x07suggest\"$\n\x05Genre\x12\r\n\x05\x63\x61tch\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\"\xbf\x01\n\x04Shop\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x02 \x01(\t\x12\x0e\n\x06\x61\x63\x63\x65ss\x18\x03 \x01(\t\x12\x10\n\x08latitude\x18\x04 \x01(\x01\x12\x11\n\tlongitude\x18\x05 \x01(\x01\x12\x0e\n\x06\x62udget\x18\x06 \x01(\t\x12\x0c\n\x04open\x18\x07 \x01(\t\x12\x1d\n\x05genre\x18\x08 \x01(\x0b\x32\x0e.suggest.Genre\x12\x13\n\x0b\x63oupon_urls\x18\t \x01(\t\x12\x11\n\timage_url\x18\n \x01(\t\"1\n\x0eSuggestRequest\x12\x1f\n\x08stations\x18\x01 \x03(\x0b\x32\r.suggest.Shop\"\x1f\n\x0fSuggestResponse\x12\x0c\n\x04plan\x18\x01 \x01(\t2G\n\x07Suggest\x12<\n\x07Suggest\x12\x17.suggest.SuggestRequest\x1a\x18.suggest.SuggestResponseB!Z\x1fserver/suggest/server/suggestpbb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x17suggestpb/suggest.proto\x12\x07suggest\"$\n\x05Genre\x12\r\n\x05\x63\x61tch\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\"\xc0\x01\n\x05Store\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x02 \x01(\t\x12\x0e\n\x06\x61\x63\x63\x65ss\x18\x03 \x01(\t\x12\x10\n\x08latitude\x18\x04 \x01(\x01\x12\x11\n\tlongitude\x18\x05 \x01(\x01\x12\x0e\n\x06\x62udget\x18\x06 \x01(\t\x12\x0c\n\x04open\x18\x07 \x01(\t\x12\x1d\n\x05genre\x18\x08 \x01(\x0b\x32\x0e.suggest.Genre\x12\x13\n\x0b\x63oupon_urls\x18\t \x01(\t\x12\x11\n\timage_url\x18\n \x01(\t\"A\n\x06Option\x12\x11\n\tpeopleNum\x18\x01 \x01(\x05\x12\x12\n\narriveTime\x18\x02 \x01(\t\x12\x10\n\x08\x63\x61tegory\x18\x03 \x01(\t\"(\n\x06Stores\x12\x1e\n\x06stores\x18\x01 \x03(\x0b\x32\x0e.suggest.Store\"5\n\x04Plan\x12\x0c\n\x04plan\x18\x01 \x01(\t\x12\x1f\n\x06stores\x18\x02 \x03(\x0b\x32\x0f.suggest.Stores\"+\n\x0bStationPlan\x12\x1c\n\x05plans\x18\x01 \x03(\x0b\x32\r.suggest.Plan\"R\n\x0eSuggestRequest\x12\x1f\n\x06option\x18\x01 \x01(\x0b\x32\x0f.suggest.Option\x12\x1f\n\x06stores\x18\x02 \x03(\x0b\x32\x0f.suggest.Stores\"8\n\x0fSuggestResponse\x12%\n\x07station\x18\x01 \x03(\x0b\x32\x14.suggest.StationPlan2G\n\x07Suggest\x12<\n\x07Suggest\x12\x17.suggest.SuggestRequest\x1a\x18.suggest.SuggestResponseB!Z\x1fserver/suggest/server/suggestpbb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -24,12 +24,20 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _globals['DESCRIPTOR']._serialized_options = b'Z\037server/suggest/server/suggestpb'
   _globals['_GENRE']._serialized_start=36
   _globals['_GENRE']._serialized_end=72
-  _globals['_SHOP']._serialized_start=75
-  _globals['_SHOP']._serialized_end=266
-  _globals['_SUGGESTREQUEST']._serialized_start=268
-  _globals['_SUGGESTREQUEST']._serialized_end=317
-  _globals['_SUGGESTRESPONSE']._serialized_start=319
-  _globals['_SUGGESTRESPONSE']._serialized_end=350
-  _globals['_SUGGEST']._serialized_start=352
-  _globals['_SUGGEST']._serialized_end=423
+  _globals['_STORE']._serialized_start=75
+  _globals['_STORE']._serialized_end=267
+  _globals['_OPTION']._serialized_start=269
+  _globals['_OPTION']._serialized_end=334
+  _globals['_STORES']._serialized_start=336
+  _globals['_STORES']._serialized_end=376
+  _globals['_PLAN']._serialized_start=378
+  _globals['_PLAN']._serialized_end=431
+  _globals['_STATIONPLAN']._serialized_start=433
+  _globals['_STATIONPLAN']._serialized_end=476
+  _globals['_SUGGESTREQUEST']._serialized_start=478
+  _globals['_SUGGESTREQUEST']._serialized_end=560
+  _globals['_SUGGESTRESPONSE']._serialized_start=562
+  _globals['_SUGGESTRESPONSE']._serialized_end=618
+  _globals['_SUGGEST']._serialized_start=620
+  _globals['_SUGGEST']._serialized_end=691
 # @@protoc_insertion_point(module_scope)
