@@ -45,7 +45,7 @@ export const Map: React.FC<MapProps> = (props) => {
   const [hasNewMessage, setHasNewMessage] = useState(false)
   useEffect(() => {
     const websocket = new WebSocket(
-      `ws${process.env.REACT_APP_API_URL}/ws?token=${token}&room_id=${roomId}`
+      `${process.env.REACT_APP_WEBSOCKET_URL}?token=${token}&room_id=${roomId}`
     )
     websocket.onopen = () => {
       const loginMessage = JSON.stringify({

@@ -17,7 +17,7 @@ export const useMutateAuth = (props: MutateAuthProps) => {
   const loginMutation = useMutation(
     async (user: Credential) =>
       await axios.post(
-        `http${process.env.REACT_APP_API_URL}/login?room_id=${
+        `${process.env.REACT_APP_API_URL}/login?room_id=${
           roomId !== '' ? roomId : user.user_id
         }`,
         user
@@ -38,7 +38,7 @@ export const useMutateAuth = (props: MutateAuthProps) => {
   )
   const registerMutation = useMutation(
     async (user: Credential) =>
-      await axios.post(`http${process.env.REACT_APP_API_URL}/signup`, user),
+      await axios.post(`${process.env.REACT_APP_API_URL}/signup`, user),
     {
       onError: (err: any) => {
         if (err.response.data.message) {
@@ -50,7 +50,7 @@ export const useMutateAuth = (props: MutateAuthProps) => {
     }
   )
   const logoutMutation = useMutation(
-    async () => await axios.post(`http${process.env.REACT_APP_API_URL}/logout`),
+    async () => await axios.post(`${process.env.REACT_APP_API_URL}/logout`),
     {
       onSuccess: () => {
         if (ws) {

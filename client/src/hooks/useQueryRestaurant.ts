@@ -18,7 +18,7 @@ export const useQueryRestaurants = (props: QueryRestaurantsProps) => {
       10
     )
     const response = await axios.post<RestaurantsResponse>(
-      `http${process.env.REACT_APP_API_URL}/restaurants?room_id=${roomId}`,
+      `${process.env.REACT_APP_API_URL}/restaurants?room_id=${roomId}`,
       restaurantsRequest
     )
     return response.data

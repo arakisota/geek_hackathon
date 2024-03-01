@@ -5,7 +5,7 @@ export const useError = () => {
   // eslint-disable-next-line
   const getCsrfToken = async () => {
     const { data } = await axios.get<CsrfToken>(
-      `http${process.env.REACT_APP_API_URL}/csrf`
+      `${process.env.REACT_APP_API_URL}/csrf`
     )
     axios.defaults.headers.common['X-CSRF-TOKEN'] = data.csrf_token
   }
