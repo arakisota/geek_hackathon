@@ -29,7 +29,7 @@ func (sr *stationRepository) GetTransportRecordsByDeparture(departure string) ([
 
 func (sr *stationRepository) FindByPrefix(prefix string) ([]model.StationInfo, error) {
     var stations []model.StationInfo
-    if err := sr.db.Where("name LIKE ?", prefix+"%").Or("yomi LIKE ?", prefix+"%").Limit(10).Find(&stations).Error; err != nil {
+    if err := sr.db.Where("(name LIKE ? OR yomi LIKE ?) AND yomi != ''", prefix+"%", prefix+"%").Limit(10).Find(&stations).Error; err != nil {
         return nil, err
     }
     return stations, nil

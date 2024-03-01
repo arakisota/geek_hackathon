@@ -112,9 +112,19 @@ func FindStations(destinationMap map[string]destinationInfo) (string, string, st
 			fastestTime = destInfo.averageTime
 			fastestStation = dest
 		}
+	}
+	for dest, destInfo := range destinationMap {
+		if fastestStation == dest {
+			continue
+		}
 		if destInfo.averageCount < fewestTransferCount {
 			fewestTransferCount = destInfo.averageCount
 			fewestTransferStation = dest
+		}
+	}
+	for dest, destInfo := range destinationMap {
+		if fastestStation == dest || fewestTransferStation == dest {
+			continue
 		}
 		if destInfo.averageFare < cheapestFare {
 			cheapestFare = destInfo.averageFare
