@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"server/controller"
 	"server/database"
 	"server/repository"
@@ -14,7 +15,12 @@ func main() {
 	userValidator := validator.NewUserValidator()
 	userRepository := repository.NewUserRepository(db)
 	stationRepository := repository.NewStationRepository(db)
-	restaurantRepository := repository.NewRestaurantRepository(db)
+	grpcServerAddress := "localhost:50051"
+	// restaurantRepository, _ := repository.NewRestaurantRepository(db)
+	restaurantRepository, err := repository.NewRestaurantRepository(db, grpcServerAddress)
+	if err != nil {
+		log.Fatalf("Failed to create restaurant repository: %v", err)
+	}
 	routeRepository := repository.NewRouteRepository(db)
 	userUsecase := usecase.NewUserUsecase(userRepository, userValidator)
 	stationUsecase := usecase.NewStationUsecase(stationRepository)

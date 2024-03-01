@@ -1,15 +1,20 @@
 package repository
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+
 	"gorm.io/gorm"
 
 	"server/model"
+	"server/suggest/client/suggestpb"
 )
 
 // ホットペッパーグルメAPIへのリクエストとレスポンスの処理を行う
@@ -17,24 +22,24 @@ import (
 
 type IRestaurantRepository interface {
 	GetRestaurants(cr model.ClientRequest) ([]model.ClientResponse, error)
-	// SendRestaurantsToGRPC(ctx context.Context, restaurants []model.Station, option model.Option) (*suggestpb.SuggestResponse, error)
+	SendRestaurantsToGRPC(ctx context.Context, restaurants []model.Station, option model.Option) (*suggestpb.SuggestResponse, error)
 }
 
 type RestaurantRepository struct {
-	db     *gorm.DB
-	apiKey string
-	// grpcClient suggestpb.SuggestClient
+	db         *gorm.DB
+	apiKey     string
+	grpcClient suggestpb.SuggestClient
 }
 
-func NewRestaurantRepository(db *gorm.DB) (*RestaurantRepository, error) {
-	// func NewRestaurantRepository(db *gorm.DB, serverAddress string) (*RestaurantRepository, error) {
+// func NewRestaurantRepository(db *gorm.DB) (*RestaurantRepository, error) {
+func NewRestaurantRepository(db *gorm.DB, serverAddress string) (*RestaurantRepository, error) {
 	apiKey := os.Getenv("HOTPEPPER_API_KEY") // 環境変数からAPIキーを取得
-	return &RestaurantRepository{db: db, apiKey: apiKey}, nil
-	// rr := &RestaurantRepository{db: db, apiKey: apiKey}
-	// if err := rr.InitGRPCClient(serverAddress); err != nil {
-	// 	return nil, err
-	// }
-	// return rr, nil
+	// return &RestaurantRepository{db: db, apiKey: apiKey}, nil
+	rr := &RestaurantRepository{db: db, apiKey: apiKey}
+	if err := rr.InitGRPCClient(serverAddress); err != nil {
+		return nil, err
+	}
+	return rr, nil
 }
 
 func (rr *RestaurantRepository) GetStationCoordinates(station string) ([]model.StationInfo, error) {
@@ -126,61 +131,66 @@ func (rr *RestaurantRepository) convertClientRequestToHotpepperRequest(cr model.
 	}
 }
 
-// // gRPCクライアントの初期化
-// func (rr *RestaurantRepository) InitGRPCClient(serverAddress string) error {
-// 	conn, err := grpc.Dial(serverAddress, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
-// 	if err != nil {
-// 		return fmt.Errorf("サーバーへの接続に失敗しました: %v", err)
-// 	}
-// 	rr.grpcClient = suggestpb.NewSuggestClient(conn)
-// 	return nil
-// }
+// gRPCクライアントの初期化
+func (rr *RestaurantRepository) InitGRPCClient(serverAddress string) error {
+	conn, err := grpc.Dial(serverAddress, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
+	// fmt.Println(conn)
+	if err != nil {
+		return fmt.Errorf("サーバーへの接続に失敗しました: %v", err)
+	}
+	rr.grpcClient = suggestpb.NewSuggestClient(conn)
+	return nil
+}
 
-// // gRPCサーバーに店舗情報を送信し、処理結果を受け取る
-// func (rr *RestaurantRepository) SendRestaurantsToGRPC(ctx context.Context, restaurants []model.Station, option model.Option) (*suggestpb.SuggestResponse, error) {
-// 	// 送信する店舗情報をgRPCリクエストの形式に変換
-// 	var stores []*suggestpb.Store
-// 	for _, r := range restaurants {
-// 		store := &suggestpb.Store{
-// 			Name:      r.Name,
-// 			Address:   r.Address,
-// 			Access:    r.Access,
-// 			Latitude:  r.Latitude,
-// 			Longitude: r.Longitude,
-// 			Budget:    r.Budget,
-// 			Open:      r.Open,
-// 			Genre: &suggestpb.Genre{
-// 				Catch: r.Genre.Catch,
-// 				Name:  r.Genre.Name,
-// 			},
-// 			CouponUrls: r.CouponUrls,
-// 			ImageUrl:   r.ImageUrl,
-// 		}
-// 		stores = append(stores, store)
-// 	}
+// gRPCサーバーに店舗情報を送信し、処理結果を受け取る
+func (rr *RestaurantRepository) SendRestaurantsToGRPC(ctx context.Context, restaurants []model.Station, option model.Option) (*suggestpb.SuggestResponse, error) {
+	// 送信する店舗情報をgRPCリクエストの形式に変換
+	var stores []*suggestpb.Store
+	for _, r := range restaurants {
+		store := &suggestpb.Store{
+			Name:      r.Name,
+			Address:   r.Address,
+			Access:    r.Access,
+			Latitude:  r.Latitude,
+			Longitude: r.Longitude,
+			Budget:    r.Budget,
+			Open:      r.Open,
+			Genre: &suggestpb.Genre{
+				Catch: r.Genre.Catch,
+				Name:  r.Genre.Name,
+			},
+			CouponUrls: r.CouponUrls,
+			ImageUrl:   r.ImageUrl,
+		}
+		stores = append(stores, store)
+	}
+	// fmt.Println(stores)
 
-// 	// オプション設定の変換
-// 	gRPCOption := &suggestpb.Option{
-// 		PeopleNum:  int32(option.PeopleNum),
-// 		ArriveTime: option.ArriveTime,
-// 		Category:   option.Category,
-// 	}
+	// オプション設定の変換
+	gRPCOption := &suggestpb.Option{
+		PeopleNum:  int32(option.PeopleNum),
+		ArriveTime: option.ArriveTime,
+		Category:   option.Category,
+	}
 
-// 	// gRPCリクエストの作成
-// 	request := &suggestpb.SuggestRequest{
-// 		Option: gRPCOption,
-// 		Stores: []*suggestpb.Stores{
-// 			{
-// 				Stores: stores,
-// 			},
-// 		},
-// 	}
+	// fmt.Println(gRPCOption)
 
-// 	// gRPCサーバーにリクエストを送信し、レスポンスを受け取る
-// 	response, err := rr.grpcClient.Suggest(ctx, request)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("gRPCメソッドの呼び出しでエラーが発生しました: %w", err)
-// 	}
+	// gRPCリクエストの作成
+	request := &suggestpb.SuggestRequest{
+		Option: gRPCOption,
+		Stores: []*suggestpb.Stores{
+			{
+				Stores: stores,
+			},
+		},
+	}
+	// fmt.Println(request)
+	// gRPCサーバーにリクエストを送信し、レスポンスを受け取る
+	response, err := rr.grpcClient.Suggest(ctx, request)
+	// fmt.Println(response)
+	if err != nil {
+		return nil, fmt.Errorf("gRPCメソッドの呼び出しでエラーが発生しました: %w", err)
+	}
 
-// 	return response, nil
-// }
+	return response, nil
+}
