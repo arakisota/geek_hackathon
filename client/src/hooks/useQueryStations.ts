@@ -1,23 +1,30 @@
 import axios from 'axios'
 import { useMutation } from '@tanstack/react-query'
+import { StationsResponse, StationsRequest, SuggestionResponse } from '../types'
 import {
-  StationsResponse,
-  StationsRequest,
-  SuggestionResponse,
-  RestaurantsRequest,
-  RoutesRequest,
-} from '../types'
+  useQueryRestaurants,
+  QueryRestaurantsProps,
+} from './useQueryRestaurant'
+import { useQueryRoutes, QueryRoutesProps } from './useQueryRoutes'
 
 export type QueryStationsProps = {
-  setRestaurantsRequest: (restaurantsRequest: RestaurantsRequest) => void
-  setRoutesRequest: (routesRequest: RoutesRequest) => void
+  roomId: string
 }
 
 export const useQueryStations = (props: QueryStationsProps) => {
+  const { roomId } = props
+
+  const { queryRestaurants } = useQueryRestaurants({
+    roomId,
+  } as QueryRestaurantsProps)
+  const { queryRoutes } = useQueryRoutes({
+    roomId,
+  } as QueryRoutesProps)
+
   const queryStations = useMutation<StationsResponse, Error, StationsRequest>(
     async (stationsRequest: StationsRequest) => {
       const response = await axios.post<StationsResponse>(
-        `${process.env.REACT_APP_API_URL}/stations`,
+        `${process.env.REACT_APP_API_URL}/stations?room_id=${roomId}`,
         stationsRequest
       )
 
@@ -29,18 +36,19 @@ export const useQueryStations = (props: QueryStationsProps) => {
           return self.indexOf(station) === index
         })
 
-      props.setRestaurantsRequest({
+      queryRestaurants.mutate({
         stations: stationArray,
         people_num: stationsRequest.people_num,
         arrival_time: stationsRequest.arrival_time,
         purpose: stationsRequest.purpose,
       })
 
-      props.setRoutesRequest({
-        departure_stations: stationsRequest.departures.map((station) => station.replace(/駅$/, ''))
-        .filter((station, index, self) => {
-          return self.indexOf(station) === index
-        }),
+      queryRoutes.mutate({
+        departure_stations: stationsRequest.departures
+          .map((station) => station.replace(/駅$/, ''))
+          .filter((station, index, self) => {
+            return self.indexOf(station) === index
+          }),
         destination_stations: stationArray,
       })
 
@@ -55,5 +63,5 @@ export const useQueryStations = (props: QueryStationsProps) => {
     )
     return response.data
   }
-  return { queryStations, getStationName }
+  return { queryStations, getStationName, queryRestaurants, queryRoutes }
 }

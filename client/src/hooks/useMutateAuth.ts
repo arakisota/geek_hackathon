@@ -4,19 +4,28 @@ import { Credential } from '../types'
 import { useError } from '../hooks/useError'
 
 export type MutateAuthProps = {
+  roomId: string
   setIsLogined: (state: boolean) => void
+  ws: WebSocket | null
+  setWs: (ws: WebSocket | null) => void
 }
 
 export const useMutateAuth = (props: MutateAuthProps) => {
-  const { setIsLogined } = props
+  const { roomId, setIsLogined, ws, setWs } = props
 
   const { switchErrorHandling } = useError()
   const loginMutation = useMutation(
     async (user: Credential) =>
-      await axios.post(`${process.env.REACT_APP_API_URL}/login`, user),
+      await axios.post(
+        `${process.env.REACT_APP_API_URL}/login?room_id=${
+          roomId !== '' ? roomId : user.user_id
+        }`,
+        user
+      ),
     {
-      onSuccess: () => {
+      onSuccess: (data) => {
         setIsLogined(true)
+        localStorage.setItem('token', data.data.token)
       },
       onError: (err: any) => {
         if (err.response.data.message) {
@@ -44,7 +53,17 @@ export const useMutateAuth = (props: MutateAuthProps) => {
     async () => await axios.post(`${process.env.REACT_APP_API_URL}/logout`),
     {
       onSuccess: () => {
+        if (ws) {
+          const logoutMessage = JSON.stringify({
+            type: 'logout',
+            content: '',
+          })
+          ws.send(logoutMessage)
+          ws.close(1000)
+          setWs(null)
+        }
         setIsLogined(false)
+        localStorage.removeItem('token')
       },
       onError: (err: any) => {
         if (err.response.data.message) {

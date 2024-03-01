@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"net/http"
 	"server/model"
 	"server/usecase"
@@ -13,11 +14,12 @@ type IRouteController interface {
 }
 
 type routeController struct {
-	ru usecase.IRouteUsecase
+	ru  usecase.IRouteUsecase
+	Hub *model.Hub
 }
 
-func NewRouteController(ru usecase.IRouteUsecase) IRouteController {
-	return &routeController{ru}
+func NewRouteController(ru usecase.IRouteUsecase, hub *model.Hub) IRouteController {
+	return &routeController{ru, hub}
 }
 
 func (rc *routeController) GetRoutes(c echo.Context) error {
@@ -29,5 +31,11 @@ func (rc *routeController) GetRoutes(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
+	routesJSON, err := json.Marshal(routes)
+    if err != nil {
+        return c.JSON(http.StatusInternalServerError, err.Error())
+    }
+	roomId := c.QueryParam("room_id")
+    rc.Hub.BroadcastToRoom("routes", roomId, routesJSON, nil)
 	return c.JSON(http.StatusOK, routes)
 }

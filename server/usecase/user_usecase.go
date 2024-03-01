@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"fmt"
 	"os"
 	"server/model"
 	"server/repository"
@@ -14,15 +15,19 @@ import (
 type IUserUsecase interface {
 	SignUp(user model.User) (model.UserResponse, error)
 	Login(user model.User) (string, error)
+	CreateRoom(userId string)
+	JoinRoom(userId string, roomId string) error
+	DeleteRoom(roomId string)
 }
 
 type userUsecase struct {
 	ur repository.IUserRepository
 	uv validator.IUserValidator
+	rm model.RoomManager
 }
 
-func NewUserUsecase(ur repository.IUserRepository, uv validator.IUserValidator) IUserUsecase {
-	return &userUsecase{ur, uv}
+func NewUserUsecase(ur repository.IUserRepository, uv validator.IUserValidator, rm model.RoomManager) IUserUsecase {
+	return &userUsecase{ur, uv, rm}
 }
 
 
@@ -65,4 +70,22 @@ func (uu *userUsecase) Login(user model.User) (string, error) {
 		return "", err
 	}
 	return tokenString, nil
+}
+
+func (uu *userUsecase) CreateRoom(userId string) {
+    room := model.NewRoom(userId)
+    uu.rm.Rooms[room.RoomId] = room
+}
+
+func (uu *userUsecase) JoinRoom(userId string, roomID string) error {
+    room, exists := uu.rm.Rooms[roomID]
+    if !exists {
+        return fmt.Errorf("room not found")
+    }
+    room.Clients[userId] = true
+    return nil
+}
+
+func (uu *userUsecase) DeleteRoom(roomId string) {
+	delete(uu.rm.Rooms, roomId)
 }
