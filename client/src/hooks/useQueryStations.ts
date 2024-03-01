@@ -24,7 +24,7 @@ export const useQueryStations = (props: QueryStationsProps) => {
   const queryStations = useMutation<StationsResponse, Error, StationsRequest>(
     async (stationsRequest: StationsRequest) => {
       const response = await axios.post<StationsResponse>(
-        `${process.env.REACT_APP_API_URL}/stations?room_id=${roomId}`,
+        `http${process.env.REACT_APP_API_URL}/stations?room_id=${roomId}`,
         stationsRequest
       )
 
@@ -58,7 +58,7 @@ export const useQueryStations = (props: QueryStationsProps) => {
 
   const getStationName = async (input: string) => {
     const response = await axios.get<SuggestionResponse>(
-      `${process.env.REACT_APP_API_URL}/suggest`,
+      `http${process.env.REACT_APP_API_URL}/suggest`,
       { params: { input } }
     )
     return response.data
