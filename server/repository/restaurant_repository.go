@@ -17,16 +17,24 @@ import (
 
 type IRestaurantRepository interface {
 	GetRestaurants(cr model.ClientRequest) ([]model.ClientResponse, error)
+	// SendRestaurantsToGRPC(ctx context.Context, restaurants []model.Station, option model.Option) (*suggestpb.SuggestResponse, error)
 }
 
 type RestaurantRepository struct {
 	db     *gorm.DB
 	apiKey string
+	// grpcClient suggestpb.SuggestClient
 }
 
-func NewRestaurantRepository(db *gorm.DB) *RestaurantRepository {
+func NewRestaurantRepository(db *gorm.DB) (*RestaurantRepository, error) {
+	// func NewRestaurantRepository(db *gorm.DB, serverAddress string) (*RestaurantRepository, error) {
 	apiKey := os.Getenv("HOTPEPPER_API_KEY") // 環境変数からAPIキーを取得
-	return &RestaurantRepository{db: db, apiKey: apiKey}
+	return &RestaurantRepository{db: db, apiKey: apiKey}, nil
+	// rr := &RestaurantRepository{db: db, apiKey: apiKey}
+	// if err := rr.InitGRPCClient(serverAddress); err != nil {
+	// 	return nil, err
+	// }
+	// return rr, nil
 }
 
 func (rr *RestaurantRepository) GetStationCoordinates(station string) ([]model.StationInfo, error) {
@@ -40,14 +48,14 @@ func (rr *RestaurantRepository) GetStationCoordinates(station string) ([]model.S
 const (
 	URL_TEMPLATE = "http://webservice.recruit.co.jp/hotpepper/gourmet/v1/?key=%s&format=json&lat=%f&lng=%f&range=%d&count=%d&order=4"
 	RANGE        = "2"
-	COUNT        = 5
+	COUNT        = 10
 )
 
 func (rr *RestaurantRepository) GetRestaurants(cr model.ClientRequest) ([]model.ClientResponse, error) {
 	// ホットペッパーグルメAPIへのリクエストデータを生成
 	hr := rr.convertClientRequestToHotpepperRequest(cr)
 	// mapの形式でstationsを定義
-	stations := make([]model.ClientResponse, 0)
+	responses := make([]model.ClientResponse, 0)
 
 	for idx := range hr.Name {
 		Latitude := hr.Lat[idx]
@@ -64,7 +72,7 @@ func (rr *RestaurantRepository) GetRestaurants(cr model.ClientRequest) ([]model.
 
 		var apiResult interface{}
 		if err := json.Unmarshal(body, &apiResult); err != nil {
-			panic(err)
+			return nil, err // panicからreturn nil, errに変更
 		}
 
 		result := make([]model.Station, 0)
@@ -88,11 +96,12 @@ func (rr *RestaurantRepository) GetRestaurants(cr model.ClientRequest) ([]model.
 			result = append(result, newResponse)
 		}
 		newClientResponse := model.ClientResponse{
-			Stations: result,
+			Stations:    result,
+			StationPlan: model.StationPlan{},
 		}
-		stations = append(stations, newClientResponse)
+		responses = append(responses, newClientResponse)
 	}
-	return stations, nil
+	return responses, nil
 }
 
 // ここでクライアントからのリクエストデータをホットペッパーグルメAPIへのリクエストデータに変換する
@@ -116,3 +125,62 @@ func (rr *RestaurantRepository) convertClientRequestToHotpepperRequest(cr model.
 		Lng:  lngs,
 	}
 }
+
+// // gRPCクライアントの初期化
+// func (rr *RestaurantRepository) InitGRPCClient(serverAddress string) error {
+// 	conn, err := grpc.Dial(serverAddress, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
+// 	if err != nil {
+// 		return fmt.Errorf("サーバーへの接続に失敗しました: %v", err)
+// 	}
+// 	rr.grpcClient = suggestpb.NewSuggestClient(conn)
+// 	return nil
+// }
+
+// // gRPCサーバーに店舗情報を送信し、処理結果を受け取る
+// func (rr *RestaurantRepository) SendRestaurantsToGRPC(ctx context.Context, restaurants []model.Station, option model.Option) (*suggestpb.SuggestResponse, error) {
+// 	// 送信する店舗情報をgRPCリクエストの形式に変換
+// 	var stores []*suggestpb.Store
+// 	for _, r := range restaurants {
+// 		store := &suggestpb.Store{
+// 			Name:      r.Name,
+// 			Address:   r.Address,
+// 			Access:    r.Access,
+// 			Latitude:  r.Latitude,
+// 			Longitude: r.Longitude,
+// 			Budget:    r.Budget,
+// 			Open:      r.Open,
+// 			Genre: &suggestpb.Genre{
+// 				Catch: r.Genre.Catch,
+// 				Name:  r.Genre.Name,
+// 			},
+// 			CouponUrls: r.CouponUrls,
+// 			ImageUrl:   r.ImageUrl,
+// 		}
+// 		stores = append(stores, store)
+// 	}
+
+// 	// オプション設定の変換
+// 	gRPCOption := &suggestpb.Option{
+// 		PeopleNum:  int32(option.PeopleNum),
+// 		ArriveTime: option.ArriveTime,
+// 		Category:   option.Category,
+// 	}
+
+// 	// gRPCリクエストの作成
+// 	request := &suggestpb.SuggestRequest{
+// 		Option: gRPCOption,
+// 		Stores: []*suggestpb.Stores{
+// 			{
+// 				Stores: stores,
+// 			},
+// 		},
+// 	}
+
+// 	// gRPCサーバーにリクエストを送信し、レスポンスを受け取る
+// 	response, err := rr.grpcClient.Suggest(ctx, request)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("gRPCメソッドの呼び出しでエラーが発生しました: %w", err)
+// 	}
+
+// 	return response, nil
+// }

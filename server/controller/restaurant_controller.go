@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"server/model"
 	"server/usecase"
@@ -25,14 +24,14 @@ func NewRestaurantController(uc usecase.IRestaurantUsecase) IRestaurantControlle
 }
 
 func (rc *RestaurantController) GetRestaurants(ctx echo.Context) error {
-	// cr := new(model.ClientRequest)
 	cr := model.ClientRequest{}
 	if err := ctx.Bind(&cr); err != nil {
 		return ctx.JSON(http.StatusBadRequest, err.Error())
 	}
-	fmt.Println(cr)
 
-	restaurants, err := rc.Usecase.GetRestaurantsNearStation(cr)
+	stdCtx := ctx.Request().Context()
+
+	restaurants, err := rc.Usecase.GetRestaurantsNearStation(stdCtx, cr)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, err.Error())
 	}
