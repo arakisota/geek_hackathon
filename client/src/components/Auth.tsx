@@ -60,13 +60,14 @@ export const Auth: FC<AuthProps> = (props: AuthProps) => {
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 font-mono text-gray-600">
       <div className="container mx-auto p-4">
-        <div className="flex flex-col lg:flex-row items-center justify-center gap-10 lg:justify-start lg:gap-20">
+        <div className="flex flex-col items-center justify-center gap-10">
           <img
             src={togatherLogo}
             alt="ToGather Logo"
-            className="w-96 lg:w-1/2 h-auto"
+            className="w-full md:w-1/2 max-w-full md:max-w-1/2 h-auto"
           />
-          <div className="max-w-md lg:w-1/2 bg-white shadow-lg rounded-lg p-8">
+
+          <div className="max-w-md bg-white shadow-lg rounded-lg p-8">
             <div className="tabs flex justify-between mb-4">
               <button
                 className={`tab-button border-r border-gray-300 ${
@@ -120,7 +121,10 @@ export const Auth: FC<AuthProps> = (props: AuthProps) => {
                 name="user_id"
                 type="text"
                 placeholder="UserID (ex. user)"
-                onChange={(e) => setUserId(e.target.value)}
+                onChange={(e) => {
+                  setUserId(e.target.value)
+                  if (isRoomCreation) setRoomId(e.target.value)
+                }}
                 value={userId}
               />
               {!isRoomCreation && (
