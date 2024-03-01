@@ -15,8 +15,8 @@ message Genre {
     string name = 2;
 }
 
-// 各駅のお店
-message Shop {
+// 各駅の店舗情報
+message Store {
   string name = 1;
   string address = 2;
   string access = 3;
@@ -29,10 +29,36 @@ message Shop {
   string image_url = 10;
 }
 
-message SuggestRequest {
-  repeated Shop stations = 1;
+// オプション設定
+message Option {
+  int32 peopleNum = 1;  // 参加人数
+  string arriveTime = 2;  // 到着時刻
+  string category = 3;  // カテゴリー
 }
 
+// 1つの駅に含まれる店舗リスト
+message Stores {
+  repeated Store stores = 1;
+}
+
+// plan単体
+message Plan {
+  string plan = 1;
+  repeated Stores stores = 2;
+}
+
+// 1つの駅のplan
+message StationPlan {
+  repeated Plan plans = 1;  // 1つの駅のプランリスト
+}
+
+// 提案プランを作成してもらうためのリクエスト
+message SuggestRequest {
+  Option option = 1;  // オプション設定
+  repeated Stores stores = 2;  // 駅ごとのプランリスト
+}
+
+// 提案プランのレスポンス
 message SuggestResponse {
-    string plan = 1;
+    repeated StationPlan station = 1;
 }
