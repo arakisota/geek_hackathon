@@ -342,14 +342,14 @@ interface DummyRestaurant {
   // 他にもレストランに関連するプロパティがあればここに追加
 }
 
-interface Plan {
+interface PlanData {
   id: number
   name: string
   restaurants: DummyRestaurant[]
 }
 
 // ダミーのプランデータ
-const dummyPlans: Plan[] = [
+const dummyPlans: PlanData[] = [
   {
     id: 1,
     name: 'プラン 1',
@@ -363,7 +363,7 @@ const dummyPlans: Plan[] = [
 ]
 
 // プラン項目コンポーネント
-const PlanItem: React.FC<{ plan: Plan }> = ({ plan }) => {
+const PlanItem: React.FC<{ plan: PlanData }> = ({ plan }) => {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
