@@ -250,7 +250,7 @@ export const Form: React.FC<FormProps> = (props) => {
                 id={`station${index}`}
               />
               {suggestions[index] && suggestions[index].length > 0 && (
-                <div className="absolute left-full top-0 ml-2 z-10 w-52 bg-white border border-gray-300 max-h-40 overflow-auto">
+                <div className="absolute inset-x-0 md:left-full md:top-0 md:ml-2 z-10 w-full md:w-52 bg-white border border-gray-300 max-h-40 overflow-auto">
                   {suggestions[index].map((suggestion, sIndex) => (
                     <div
                       key={sIndex}
