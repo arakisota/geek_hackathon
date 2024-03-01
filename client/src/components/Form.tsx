@@ -1,14 +1,14 @@
 import { useState } from 'react'
 import { useForm, useFieldArray, SubmitHandler } from 'react-hook-form'
-import { useQueryStations } from '../hooks/useQueryStations'
+import { UseMutationResult } from '@tanstack/react-query'
 import { debounce } from 'lodash'
 import {
   StationRead,
   LatLng,
-  RestaurantsRequest,
-  RoutesRequest,
+  StationsResponse,
+  StationsRequest,
+  SuggestionResponse,
 } from '../types'
-import { QueryStationsProps } from '../hooks/useQueryStations'
 
 type FormData = {
   stations: { station: string }[]
@@ -18,20 +18,23 @@ type FormData = {
 }
 
 type FormProps = {
+  userId: string
+  roomId: string
   onStationSelect: (positions: LatLng[]) => void
-  setRestaurantsRequest: (restaurantsRequest: RestaurantsRequest) => void
-  setRoutesRequest: (routesRequest: RoutesRequest) => void
   onSubmit: () => void
+  queryStations: UseMutationResult<StationsResponse, Error, StationsRequest>
+  getStationName: (input: string) => Promise<SuggestionResponse>
 }
 
 export const Form: React.FC<FormProps> = (props) => {
-  const { onStationSelect, setRestaurantsRequest, setRoutesRequest, onSubmit } =
-    props
-
-  const { queryStations, getStationName } = useQueryStations({
-    setRestaurantsRequest,
-    setRoutesRequest,
-  } as QueryStationsProps)
+  const {
+    userId,
+    roomId,
+    onStationSelect,
+    onSubmit,
+    queryStations,
+    getStationName,
+  } = props
 
   // eslint-disable-next-line
   const { data, isLoading, error, mutate } = queryStations
@@ -143,8 +146,6 @@ export const Form: React.FC<FormProps> = (props) => {
     onStationSelect(newPositions)
   }
 
-  // console.log()
-
   const peopleOptions = []
   for (let i = 1; i <= 50; i++) {
     peopleOptions.push(
@@ -249,7 +250,7 @@ export const Form: React.FC<FormProps> = (props) => {
                 id={`station${index}`}
               />
               {suggestions[index] && suggestions[index].length > 0 && (
-                <div className="absolute left-full top-0 ml-2 z-10 w-52 bg-white border border-gray-300 max-h-40 overflow-auto">
+                <div className="absolute inset-x-0 md:left-full md:top-0 md:ml-2 z-10 w-full md:w-52 bg-white border border-gray-300 max-h-40 overflow-auto">
                   {suggestions[index].map((suggestion, sIndex) => (
                     <div
                       key={sIndex}
@@ -278,12 +279,12 @@ export const Form: React.FC<FormProps> = (props) => {
           </button>
           <button
             type="submit"
-            disabled={!isValid}
+            disabled={!isValid || roomId !== userId}
             className={`py-2 px-4 rounded text-white ${
-              isValid ? 'bg-indigo-600' : 'bg-gray-400'
+              isValid && roomId === userId ? 'bg-indigo-600' : 'bg-gray-400'
             }`}
           >
-            目的地を探す
+            集合地を探す
           </button>
           <button
             type="button"

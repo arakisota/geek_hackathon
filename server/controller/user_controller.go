@@ -46,6 +46,15 @@ func (uc *userController) LogIn(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
+	roomId := c.QueryParam("room_id")
+	if roomId == user.UserId {
+		uc.uu.CreateRoom(user.UserId)
+		roomId = user.UserId
+	} 
+	if err := uc.uu.JoinRoom(user.UserId, roomId); err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
 	cookie := new(http.Cookie)
 	cookie.Name = "token"
 	cookie.Value = tokenString
@@ -56,10 +65,15 @@ func (uc *userController) LogIn(c echo.Context) error {
 	cookie.HttpOnly = true
 	cookie.SameSite = http.SameSiteNoneMode
 	c.SetCookie(cookie)
-	return c.NoContent(http.StatusOK)
+	return c.JSON(http.StatusOK, map[string]string{"token": tokenString})
 }
 
 func (uc *userController) LogOut(c echo.Context) error {
+	roomId := c.QueryParam("room_id")
+	if roomId != "" {
+		uc.uu.DeleteRoom(roomId)
+	} 
+
 	cookie := new(http.Cookie)
 	cookie.Name = "token"
 	cookie.Value = ""

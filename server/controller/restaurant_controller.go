@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"fmt"
+	"encoding/json"
 	"net/http"
 	"server/model"
 	"server/usecase"
@@ -18,10 +18,11 @@ type IRestaurantController interface {
 
 type RestaurantController struct {
 	Usecase usecase.IRestaurantUsecase
+	hub     *model.Hub
 }
 
-func NewRestaurantController(uc usecase.IRestaurantUsecase) IRestaurantController {
-	return &RestaurantController{uc}
+func NewRestaurantController(uc usecase.IRestaurantUsecase, hub *model.Hub) IRestaurantController {
+	return &RestaurantController{uc, hub}
 }
 
 func (rc *RestaurantController) GetRestaurants(ctx echo.Context) error {
@@ -30,12 +31,23 @@ func (rc *RestaurantController) GetRestaurants(ctx echo.Context) error {
 	if err := ctx.Bind(&cr); err != nil {
 		return ctx.JSON(http.StatusBadRequest, err.Error())
 	}
-	fmt.Println(cr)
 
 	restaurants, err := rc.Usecase.GetRestaurantsNearStation(cr)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, err.Error())
 	}
+
+	crJSON, err := json.Marshal(cr)
+    if err != nil {
+        return ctx.JSON(http.StatusInternalServerError, err.Error())
+    }
+	restaurantsJSON, err := json.Marshal(restaurants)
+    if err != nil {
+        return ctx.JSON(http.StatusInternalServerError, err.Error())
+    }
+
+	roomId := ctx.QueryParam("room_id")
+    rc.hub.BroadcastToRoom("restaurants", roomId, restaurantsJSON, crJSON)
 
 	return ctx.JSON(http.StatusOK, restaurants)
 }

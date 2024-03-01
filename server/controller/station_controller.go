@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"net/http"
 	"server/model"
 	"server/usecase"
@@ -14,11 +15,12 @@ type IStationController interface {
 }
 
 type stationController struct {
-	su usecase.IStationUsecase
+	su  usecase.IStationUsecase
+	hub *model.Hub
 }
 
-func NewStationController(su usecase.IStationUsecase) IStationController {
-	return &stationController{su}
+func NewStationController(su usecase.IStationUsecase, hub *model.Hub) IStationController {
+	return &stationController{su, hub}
 }
 
 func (sc *stationController) GetStations(c echo.Context) error {
@@ -30,6 +32,12 @@ func (sc *stationController) GetStations(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
+	srJSON, err := json.Marshal(departures)
+    if err != nil {
+        return c.JSON(http.StatusInternalServerError, err.Error())
+    }
+	roomId := c.QueryParam("room_id")
+    sc.hub.BroadcastToRoom("stations", roomId, srJSON, nil)
 	return c.JSON(http.StatusOK, stations)
 }
 
