@@ -22,6 +22,7 @@ import {
   TbSquareRoundedNumber5Filled,
   TbSquareRoundedNumber5,
 } from 'react-icons/tb'
+import { MdKeyboardArrowDown, MdKeyboardArrowUp } from 'react-icons/md'
 
 type PlanProps = {
   userId: string
@@ -262,14 +263,21 @@ export const Plan: React.FC<PlanProps> = (props) => {
             </>
           ) : (
             <>
-              <div>
-                {dummyPlans.map((plan, index) => (
-                  <div key={index} className="flex justify-between">
-                    <PlanItem key={plan.id} plan={plan} />
+              {dummyPlans.map((plan, index) => (
+                <div
+                  key={index}
+                  className="mb-4 p-4 bg-white rounded-lg shadow"
+                >
+                  <div className="flex justify-between items-center mb-2">
+                    {getNumberIcon(index, false)}
+                    <h2 className="text-xl font-semibold">{plan.name}</h2>
                     <GrAnnounce size={24} />
                   </div>
-                ))}
-              </div>
+                  <div className="border-t border-gray-200 pt-2">
+                    <PlanItem key={plan.id} plan={plan} />
+                  </div>
+                </div>
+              ))}
             </>
           )}
         </div>
@@ -337,55 +345,76 @@ const RestaurantInfo: React.FC<RestaurantInfoProps> = ({
   </>
 )
 
-interface DummyRestaurant {
-  name: string
-  // 他にもレストランに関連するプロパティがあればここに追加
-}
-
 interface PlanData {
   id: number
   name: string
-  restaurants: DummyRestaurant[]
+  restaurants: Restaurant[]
 }
-
-// ダミーのプランデータ
-const dummyPlans: PlanData[] = [
-  {
-    id: 1,
-    name: 'プラン 1',
-    restaurants: [{ name: 'レストラン A' }, { name: 'レストラン B' }],
-  },
-  {
-    id: 2,
-    name: 'プラン 2',
-    restaurants: [{ name: 'レストラン C' }, { name: 'レストラン D' }],
-  },
-]
 
 // プラン項目コンポーネント
 const PlanItem: React.FC<{ plan: PlanData }> = ({ plan }) => {
   const [isOpen, setIsOpen] = useState(false)
+  const [isOpenRestaurant, setIsOpenRestaurant] = useState<boolean[]>([
+    false,
+    false,
+  ])
 
   return (
     <div>
       <button
-        className="w-full text-left py-2"
+        className="flex justify-center items-center w-full py-2"
         onClick={() => setIsOpen(!isOpen)}
       >
-        {plan.name}
+        {!isOpen ? (
+          <MdKeyboardArrowDown size={20} />
+        ) : (
+          <MdKeyboardArrowUp size={20} />
+        )}
       </button>
       {isOpen && (
         <div className="flex flex-col">
           {plan.restaurants.map((restaurant, index, arr) => (
             <div key={index} className="flex">
-              <div className="flex flex-col items-center">
-                <div className="bg-blue-500 rounded-full h-4 w-4"></div>{' '}
+              <div className="flex flex-col items-center pr-2">
+                <div className="bg-gray-500 rounded-full h-4 w-4"></div>
                 {/* タイムラインドット */}
                 {index < arr.length - 1 && ( // 最後のアイテムでなければコネクタを表示
-                  <div className="w-0.5 bg-blue-500 h-8"></div>
+                  <div className="w-0.5 bg-gray-500 h-full"></div>
                 )}
               </div>
-              <div className="ml-4">{restaurant.name}</div>{' '}
+              <button
+                className="w-full text-left transition-shadow duration-300 ease-in-out shadow hover:shadow-2xl"
+                onClick={() => {
+                  if (index === 0)
+                    setIsOpenRestaurant([
+                      !isOpenRestaurant[0],
+                      isOpenRestaurant[1],
+                    ])
+                  else
+                    setIsOpenRestaurant([
+                      isOpenRestaurant[0],
+                      !isOpenRestaurant[1],
+                    ])
+                }}
+              >
+                {isOpenRestaurant[index] ? (
+                  <RestaurantInfo restaurant={restaurant} index={index} />
+                ) : (
+                  <div className="border rounded shadow flex flex-col items-center">
+                    <img
+                      className="w-full h-32 object-cover rounded"
+                      src={restaurant.image_url}
+                      alt={restaurant.name}
+                    />
+                    <div className="flex m-1">
+                      {getNumberIcon(index, false)}
+                      <h3 className="font-bold text-lg pl-1">
+                        {restaurant.name}
+                      </h3>
+                    </div>
+                  </div>
+                )}
+              </button>
             </div>
           ))}
         </div>
@@ -430,3 +459,107 @@ const getNumberIcon = (index: number, flag: boolean) => {
       return null
   }
 }
+
+// ダミーのプランデータ
+const dummyPlans: PlanData[] = [
+  {
+    id: 1,
+    name: '地元の味がここに集う、夜を彩る隠れ家バル',
+    restaurants: [
+      {
+        name: '肉バル 月光 五反田店',
+        address: '東京都品川区西五反田１－１８－１',
+        access: '五反田駅徒歩3分　夜景を一望できるシュラスコレストラン！',
+        lat: 35.6236690572,
+        lng: 139.7228991698,
+        budget: '3000円（五反田駅3分 肉寿司\u0026和牛ステーキ食べ放題）',
+        open: '月～日: 12:00～23:00 （料理L.O. 22:00 ドリンクL.O. 22:30）祝日、祝前日: 12:00～23:00',
+        coupon_urls:
+          'https://www.hotpepper.jp/strJ003737378/map/?vos=nhppalsa000016',
+        image_url:
+          'https://imgfp.hotp.jp/IMGH/52/57/P043465257/P043465257_238.jpg',
+      },
+      {
+        name: '大衆IZAKAYAエイト 大崎店',
+        address: '東京都品川区大崎３-6-17 ニュー大崎ビル2階',
+        access:
+          'りんかい線,JR大崎駅西口より徒歩約1分/東急池上線大崎広小路駅出口より徒歩約10分',
+        lat: 35.6196149059,
+        lng: 139.7272081344,
+        budget: '3000円(通常予算) 4000円(宴会予算)',
+        open: '月～金、祝前日: 11:30～14:30 （料理L.O. 14:00 ドリンクL.O. 14:00）16:30～23:00 （料理L.O. 22:20 ドリンクL.O. 22:30）土: 16:30～23:00 （料理L.O. 22:20 ドリンクL.O. 22:30）',
+        coupon_urls:
+          'https://www.hotpepper.jp/strJ001215620/map/?vos=nhppalsa000016',
+        image_url:
+          'https://imgfp.hotp.jp/IMGH/58/61/P032135861/P032135861_238.jpg',
+      },
+    ],
+  },
+  {
+    id: 2,
+    name: 'カジュアルな雰囲気で楽しむ！！！',
+    restaurants: [
+      {
+        name: '酒場TOKYO',
+        address: '東京都品川区西五反田１-32-5アネックス第2ビル1階',
+        access:
+          'ＪＲ 五反田駅 西口 徒歩3分/都営浅草線 五反田駅 徒歩3分/東急池上線 大崎広小路駅 徒歩3分',
+        lat: 35.6240670448,
+        lng: 139.7220289497,
+        budget: 'ディナー3001～4000円',
+        open: '月～木、祝日、祝前日: 11:30～14:00 （料理L.O. 13:30 ドリンクL.O. 13:30）17:00～翌3:00 （料理L.O. 翌2:00 ドリンクL.O. 翌2:30）金、土: 11:30～14:00 （料理L.O. 13:30 ドリンクL.O. 13:30）17:00～翌5:00 （料理L.O. 翌4:00 ドリンクL.O. 翌4:30）日: 11:30～14:00 （料理L.O. 13:30 ドリンクL.O. 13:30）17:00～翌1:00 （料理L.O. 翌0:00 ドリンクL.O. 翌0:30）',
+        coupon_urls:
+          'https://www.hotpepper.jp/strJ003549001/map/?vos=nhppalsa000016',
+        image_url:
+          'https://imgfp.hotp.jp/IMGH/64/46/P042056446/P042056446_238.jpg',
+      },
+      {
+        name: '【焼肉 生ホルモン 食べ放題 \u0026 レモンサワー 飲み放題】 レモホル酒場　五反田店',
+        address: '東京都品川区東五反田１-21-3',
+        access:
+          'JR山手線・東急五反田線・東京メトロ浅草線『五反田』駅 徒歩3分/五反田駅から226m',
+        lat: 35.6259813854,
+        lng: 139.7261815765,
+        budget: '2000円',
+        open: '月～日、祝日、祝前日: 17:00～23:00 （料理L.O. 22:30 ドリンクL.O. 22:30）',
+        coupon_urls:
+          'https://www.hotpepper.jp/strJ003297031/map/?vos=nhppalsa000016',
+        image_url:
+          'https://imgfp.hotp.jp/IMGH/54/24/P042805424/P042805424_238.jpg',
+      },
+    ],
+  },
+  {
+    id: 3,
+    name: 'あなたを魅了する、隠れ家的名店の秘密の味',
+    restaurants: [
+      {
+        name: '鶏料理と釜めし 居酒屋 かまどか 五反田東口店',
+        address: '東京都品川区東五反田２－２－１６　富久屋・ニッカ共同ビル１F',
+        access:
+          '東急池上線・地下鉄都営浅草線・JR五反田駅東口3分◎駅近居酒屋「かまどか」3時間飲み放題付コース3,000円～◎',
+        lat: 35.6254836277,
+        lng: 139.7248417101,
+        budget: '当日OK！単品飲み放題2時間1,650円（税込）～',
+        open: '月～木、土、日、祝日: 16:00～23:00 （料理L.O. 22:30 ドリンクL.O. 22:30）金: 16:00～翌1:00 （料理L.O. 翌0:00 ドリンクL.O. 翌0:00）',
+        coupon_urls:
+          'https://www.hotpepper.jp/strJ000022000/map/?vos=nhppalsa000016',
+        image_url:
+          'https://imgfp.hotp.jp/IMGH/27/50/P043702750/P043702750_238.jpg',
+      },
+      {
+        name: '肉バル 月光 五反田店',
+        address: '東京都品川区西五反田１－１８－１',
+        access: '五反田駅徒歩3分　夜景を一望できるシュラスコレストラン！',
+        lat: 35.6236690572,
+        lng: 139.7228991698,
+        budget: '3000円（五反田駅3分 肉寿司\u0026和牛ステーキ食べ放題）',
+        open: '月～日: 12:00～23:00 （料理L.O. 22:00 ドリンクL.O. 22:30）祝日、祝前日: 12:00～23:00',
+        coupon_urls:
+          'https://www.hotpepper.jp/strJ003737378/map/?vos=nhppalsa000016',
+        image_url:
+          'https://imgfp.hotp.jp/IMGH/52/57/P043465257/P043465257_238.jpg',
+      },
+    ],
+  },
+]
